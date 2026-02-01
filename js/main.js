@@ -204,6 +204,37 @@ function animateCounter(element, target, duration = 2000) {
 }
 
 // ===================================
+// READ MORE FUNCTIONALITY
+// ===================================
+
+/**
+ * Initialize read more buttons for initiative cards
+ */
+function initReadMoreButtons() {
+    const readMoreButtons = document.querySelectorAll('.read-more-btn');
+    
+    readMoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const card = this.closest('.initiative-card');
+            const details = card.querySelector('.card-details');
+            const preview = card.querySelector('.card-preview');
+            
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                preview.style.display = 'none';
+                this.textContent = 'Read Less';
+                card.style.minHeight = 'auto';
+            } else {
+                details.style.display = 'none';
+                preview.style.display = 'block';
+                this.textContent = 'Read More';
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+    });
+}
+
+// ===================================
 // INITIALIZATION
 // ===================================
 
@@ -218,6 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initCardHoverEffects();
     initFormEffects();
     initHeaderScrollEffect();
+    initReadMoreButtons();
 });
 
 /**
