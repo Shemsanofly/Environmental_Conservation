@@ -1,76 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Environmental Conservation</title>
+    <meta name="description" content="Contact Shemsa Environmental Conservation Company">
+    <title>Contact Us | Environmental Conservation</title>
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-    <!-- Header Section -->
-    <header>
-
-        <div class="container">
-            <table>
-                <tr>
-                    <td>
-                        <img src="images/logo.jpg" alt="our logo" width="150" ;height="150">
-                    </td>
-                    <td>
-                        <h1> ENVIRONMENTAL CONSERVATION  </h1>
-                    </td>
-                </tr>
-
-            </table>
-
-            <nav>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="initiatives.html">Initiatives</a></li>
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="contact.html">Contact</a></li>
+    <!-- Navigation Header -->
+    <header class="header" id="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo-section">
+                    <img src="images/logo.jpg" alt="Environmental Conservation Logo" class="logo">
+                    <div class="company-info">
+                        <h1 class="company-title">Shemsa Company</h1>
+                        <p class="company-subtitle">Environmental Conservation</p>
+                    </div>
+                </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="initiatives.html" class="nav-link">Initiatives</a></li>
+                    <li class="nav-item"><a href="about.html" class="nav-link">About Us</a></li>
+                    <li class="nav-item"><a href="contact.html" class="nav-link active">Contact</a></li>
                 </ul>
-            </nav>
-        </div>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
     </header>
 
+    <!-- Contact Hero Section -->
+    <section class="contact-hero">
+        <div class="container">
+            <h2 class="section-title">Get In Touch With Us</h2>
+            <p class="section-subtitle">We'd love to hear from you. Reach out to discuss our initiatives or get involved.</p>
+        </div>
+    </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="contact">
+    <section class="contact-section">
         <div class="container">
-            <h2>Contact Us</h2>
-            <p>Get involved or reach out to us for more information.</p>
-            <form action="#" method="post">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+            <div class="contact-grid">
+                <!-- Contact Form -->
+                <div class="contact-form-container fade-in">
+                    <h3>Send us a Message</h3>
+                    <form id="contactForm" class="contact-form" onsubmit="handleFormSubmit(event)">
+                        <div class="form-group">
+                            <label for="fullName">Full Name *</label>
+                            <input 
+                                type="text" 
+                                id="fullName" 
+                                name="fullName" 
+                                class="form-input"
+                                placeholder="Enter your full name"
+                                required
+                                minlength="3"
+                                maxlength="100">
+                            <span class="error-message" id="nameError"></span>
+                        </div>
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                class="form-input"
+                                placeholder="your@email.com"
+                                required>
+                            <span class="error-message" id="emailError"></span>
+                        </div>
 
-                <label for="message">Message:</label>
-                <textarea id="message" name="message" rows="5" required></textarea>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                name="phone" 
+                                class="form-input"
+                                placeholder="+255 123 456 789"
+                                pattern="[+]?[0-9 ()-]{10,}">
+                            <span class="error-message" id="phoneError"></span>
+                        </div>
 
-                <button type="submit" class="btn">Send Message</button>
-            </form>
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <input 
+                                type="text" 
+                                id="subject" 
+                                name="subject" 
+                                class="form-input"
+                                placeholder="What is this about?"
+                                required
+                                minlength="5"
+                                maxlength="100">
+                            <span class="error-message" id="subjectError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Message *</label>
+                            <textarea 
+                                id="message" 
+                                name="message" 
+                                class="form-textarea"
+                                placeholder="Your message here..."
+                                rows="6"
+                                required
+                                minlength="10"
+                                maxlength="2000"></textarea>
+                            <span class="error-message" id="messageError"></span>
+                            <small class="char-count">
+                                <span id="charCount">0</span>/2000
+                            </small>
+                        </div>
+
+                        <div class="form-group checkbox">
+                            <input type="checkbox" id="agree" name="agree" required>
+                            <label for="agree" class="checkbox-label">I agree to be contacted about my inquiry</label>
+                            <span class="error-message" id="agreeError"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="submitBtn">Send Message</button>
+                        <div class="success-message" id="successMessage"></div>
+                    </form>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="contact-info-container fade-in" style="animation-delay: 0.2s;">
+                    <h3>Contact Information</h3>
+                    
+                    <div class="info-box">
+                        <h4>📧 Email</h4>
+                        <p>info@environmental-conservation.org</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>🌍 Our Office</h4>
+                        <p>Environmental Conservation Center<br>
+                        Sustainable Development Area<br>
+                        Tanzania</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>👥 Team Members & Contacts</h4>
+                        <ul class="team-contact-list">
+                            <li>
+                                <strong>Shemsa Nassor Amin</strong> (Founder)<br>
+                                <a href="tel:+255621214785">+255 621 214 785</a>
+                            </li>
+                            <li>
+                                <strong>Sakhiya Saleh Salum</strong><br>
+                                <a href="tel:+255776219438">+255 776 219 438</a>
+                            </li>
+                            <li>
+                                <strong>Fatma Mansour Abeid</strong><br>
+                                <a href="tel:+255778699066">+255 778 699 066</a>
+                            </li>
+                            <li>
+                                <strong>Christine Christopher</strong><br>
+                                <a href="tel:+255689207982">+255 689 207 982</a>
+                            </li>
+                            <li>
+                                <strong>Farida Hussein Msoba</strong><br>
+                                <a href="tel:+255742673726">+255 742 673 726</a>
+                            </li>
+                            <li>
+                                <strong>Aisha Zakaria Ramadhan</strong><br>
+                                <a href="tel:+255776333104">+255 776 333 104</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>⏰ Operating Hours</h4>
+                        <p>Monday - Friday: 9:00 AM - 5:00 PM<br>
+                        Saturday: 10:00 AM - 2:00 PM<br>
+                        Sunday: Closed</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p>For more information, please contact us: </p>
-        <p>Shemsa Nassor Amin +255 621 214 785</p>
-        <p>Sakhiya Saleh Salum +255 776 219 438</p>
-        <p>Fatma Mansour Abeid +255 778 699 066</p>
-        <p>Christine Christopher +255 689 207 982</p>
-        <p>Farida Hussein Msoba +255 742 673 726</p>
-        <p>Aisha Zakaria Ramadhan +255 776 333 104</p>
     </section>
 
     <!-- Footer -->
-    <footer>
+    <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 Environmental Conservation Society. All rights reserved.</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Us</h4>
+                    <p>Dedicated to environmental conservation and sustainable practices.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="initiatives.html">Initiatives</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <p>Email: info@environmental-conservation.org</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Shemsa Environmental Conservation Company. All rights reserved.</p>
+            </div>
         </div>
     </footer>
-</body>
 
+    <script src="js/main.js"></script>
+    <script src="js/contact-form.js"></script>
+</body>
 </html>

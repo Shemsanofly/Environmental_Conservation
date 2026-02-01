@@ -1,62 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Environmental Conservation</title>
+    <meta name="description" content="Learn about our environmental conservation mission and team">
+    <title>About Us | Environmental Conservation</title>
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-    <!-- Header Section -->
-    <header>
-
-        <div class="container">
-            <table>
-                <tr>
-                    <td>
-                        <img src="images/logo.jpg" alt="our logo" width="150" ;height="150">
-                    </td>
-                    <td>
-                        <h1>ENVIRONMENTAL CONSERVATION </h1>
-                    </td>
-                </tr>
-
-            </table>
-
-            <nav>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="initiatives.html">Initiatives</a></li>
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="contact.html">Contact</a></li>
+    <!-- Navigation Header -->
+    <header class="header" id="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo-section">
+                    <img src="images/logo.jpg" alt="Environmental Conservation Logo" class="logo">
+                    <div class="company-info">
+                        <h1 class="company-title">Shemsa Company</h1>
+                        <p class="company-subtitle">Environmental Conservation</p>
+                    </div>
+                </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="initiatives.html" class="nav-link">Initiatives</a></li>
+                    <li class="nav-item"><a href="about.html" class="nav-link active">About Us</a></li>
+                    <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
                 </ul>
-            </nav>
-        </div>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
     </header>
 
-
-
-    <!-- About Section -->
-    <section id="about" class="about">
+    <!-- About Hero Section -->
+    <section class="about-hero">
         <div class="container">
-            <h2>About Us</h2>
-            <p>We are a community-driven organization dedicated to promoting environmental conservation. Our mission is
-                to raise awareness, implement sustainable practices, and protect natural resources for future
-                generations.</p>
-            <img src="images/new_65.JPG" alt="About Us Image"width="550" height="450" class="our image">
+            <h2 class="section-title">About Our Organization</h2>
         </div>
     </section>
 
+    <!-- Mission & Vision Section -->
+    <section class="mission-vision">
+        <div class="container">
+            <div class="mission-grid">
+                <div class="mission-card fade-in">
+                    <div class="card-icon">🎯</div>
+                    <h3>Our Mission</h3>
+                    <p>We are a community-driven organization dedicated to promoting environmental conservation. Our mission is to raise awareness, implement sustainable practices, and protect natural resources for future generations.</p>
+                </div>
+
+                <div class="mission-card fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-icon">👁️</div>
+                    <h3>Our Vision</h3>
+                    <p>A world where environmental sustainability is prioritized, biodiversity thrives, and communities work together to protect our planet for generations to come.</p>
+                </div>
+
+                <div class="mission-card fade-in" style="animation-delay: 0.4s;">
+                    <div class="card-icon">💚</div>
+                    <h3>Our Values</h3>
+                    <p>We are committed to integrity, innovation, and inclusive collaboration. We believe in the power of community action and environmental education.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Content Section -->
+    <section class="about-content">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-text">
+                    <h2>Making Real Impact</h2>
+                    <p>For years, our organization has been at the forefront of environmental conservation efforts. We combine scientific research with practical community engagement to create lasting positive change.</p>
+                    <p>Our team comprises passionate individuals from diverse backgrounds, all united by a common goal: to protect and preserve our environment. Through our comprehensive programs and initiatives, we work to address critical environmental challenges.</p>
+                    <ul class="about-features">
+                        <li>Community engagement programs</li>
+                        <li>Environmental education initiatives</li>
+                        <li>Sustainable resource management</li>
+                        <li>Habitat protection projects</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    <img src="images/new_65.JPG" alt="About Us - Team in Nature" class="fade-in-up">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <h2 class="section-title">Our Team Members</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-info">
+                        <h4>Shemsa Nassor Amin</h4>
+                        <p class="member-role">Founder & Director</p>
+                        <p class="member-contact">📱 +255 621 214 785</p>
+                    </div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-info">
+                        <h4>Sakhiya Saleh Salum</h4>
+                        <p class="member-role">Co-Founder & Project Lead</p>
+                        <p class="member-contact">📱 +255 776 219 438</p>
+                    </div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-info">
+                        <h4>Fatma Mansour Abeid</h4>
+                        <p class="member-role">Environmental Specialist</p>
+                        <p class="member-contact">📱 +255 778 699 066</p>
+                    </div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-info">
+                        <h4>Christine Christopher</h4>
+                        <p class="member-role">Community Outreach Coordinator</p>
+                        <p class="member-contact">📱 +255 689 207 982</p>
+                    </div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-info">
+                        <h4>Farida Hussein Msoba</h4>
+                        <p class="member-role">Program Manager</p>
+                        <p class="member-contact">📱 +255 742 673 726</p>
+                    </div>
+                </div>
+
+                <div class="team-member">
+                    <div class="member-info">
+                        <h4>Aisha Zakaria Ramadhan</h4>
+                        <p class="member-role">Education & Training Lead</p>
+                        <p class="member-contact">📱 +255 776 333 104</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Footer -->
-    <footer>
+    <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 Environmental Conservation Society. All rights reserved.</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Us</h4>
+                    <p>Dedicated to environmental conservation and sustainable practices.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="initiatives.html">Initiatives</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <p>Email: info@environmental-conservation.org</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Shemsa Environmental Conservation Company. All rights reserved.</p>
+            </div>
         </div>
     </footer>
-</body>
 
+    <script src="js/main.js"></script>
+</body>
 </html>

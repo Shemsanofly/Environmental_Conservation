@@ -1,79 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Environmental Conservation</title>
+    <meta name="description" content="Environmental Conservation - Dedicated to protecting nature and sustainable practices">
+    <title>Environmental Conservation | Home</title>
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-    <!-- Header Section -->
-    <header>
-        
-        <div class="container">
-            <table>
-                <tr>
-                    <td>
-                        <img src="images/logo.jpg" alt="our logo" width="150" ;height="150">
-                    </td>
-                    <td>
-                        <h1>SHEMSA COMPANY OF ENVIRONMENTAL CONSERVATION </h1>
-                    </td>
-                </tr>
-
-            </table>
-            <nav>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="initiatives.html">Initiatives</a></li>
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="contact.html">Contact</a></li>
+    <!-- Navigation Header -->
+    <header class="header" id="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo-section">
+                    <img src="images/logo.jpg" alt="Environmental Conservation Logo" class="logo">
+                    <div class="company-info">
+                        <h1 class="company-title">Shemsa Company</h1>
+                        <p class="company-subtitle">Environmental Conservation</p>
+                    </div>
+                </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item"><a href="index.html" class="nav-link active">Home</a></li>
+                    <li class="nav-item"><a href="initiatives.html" class="nav-link">Initiatives</a></li>
+                    <li class="nav-item"><a href="about.html" class="nav-link">About Us</a></li>
+                    <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
                 </ul>
-            </nav>
-            <table style="width: 100%;">
-                <tr>
-                    <td>
-                        <img src="images/water pollution.jpg" alt="water pollution" width="200" height="200">
-                        <p>Tackling water pollution</p>
-                    </td>
-                    <td>
-                        <img src="images/recycling.png" alt="recycling awareness" width="200" height="200"
-                            allignment="right">
-                        <p>Recycling awareness</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <img src="images/planting.jpeg" alt="tree-planting" width="200" height="200">
-                        <p>Tree planting</p>
-                    </td>
-                    <td>
-                        <img src="images/local dumps.jpeg" alt="local dumping sites" width="200" height="200">
-                        <p> Improving local dumping sites</p>
-                    </td>
-                </tr>
-            </table>
-
-        </div>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
     </header>
 
-    <!-- Home Section -->
-    <section id="home" class="hero">
-        <div class="container">
-
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2 class="hero-title">Protecting Nature for Future Generations</h2>
+            <p class="hero-subtitle">Join us in our mission to conserve the environment and promote sustainable practices</p>
+            <a href="initiatives.html" class="btn btn-primary">Explore Our Initiatives</a>
         </div>
     </section>
 
+    <!-- Featured Initiatives Section -->
+    <section class="featured-initiatives">
+        <div class="container">
+            <h2 class="section-title">Our Focus Areas</h2>
+            <div class="initiatives-grid">
+                <!-- Water Pollution -->
+                <div class="initiative-card" data-initiative="water">
+                    <div class="card-image">
+                        <img src="images/water pollution.jpg" alt="Water Pollution Prevention">
+                    </div>
+                    <div class="card-content">
+                        <h3>Water Pollution Control</h3>
+                        <p>Tackling contamination and protecting our vital water resources for sustainable future.</p>
+                    </div>
+                </div>
+
+                <!-- Recycling -->
+                <div class="initiative-card" data-initiative="recycling">
+                    <div class="card-image">
+                        <img src="images/recycling.png" alt="Recycling Awareness">
+                    </div>
+                    <div class="card-content">
+                        <h3>Recycling Awareness</h3>
+                        <p>Promoting waste reduction and circular economy practices in our communities.</p>
+                    </div>
+                </div>
+
+                <!-- Tree Planting -->
+                <div class="initiative-card" data-initiative="planting">
+                    <div class="card-image">
+                        <img src="images/planting.jpeg" alt="Tree Planting Program">
+                    </div>
+                    <div class="card-content">
+                        <h3>Tree Planting Program</h3>
+                        <p>Restoring forests and increasing green coverage to combat climate change.</p>
+                    </div>
+                </div>
+
+                <!-- Waste Management -->
+                <div class="initiative-card" data-initiative="waste">
+                    <div class="card-image">
+                        <img src="images/local dumps.jpeg" alt="Waste Management">
+                    </div>
+                    <div class="card-content">
+                        <h3>Waste Management</h3>
+                        <p>Improving local dumping sites and promoting proper waste disposal methods.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Make a Difference Today</h2>
+                <p>Every action counts. Get involved with our conservation initiatives.</p>
+                <a href="contact.html" class="btn btn-secondary">Join Our Cause</a>
+            </div>
+        </div>
+    </section>
 
     <!-- Footer -->
-    <footer>
+    <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 Environmental Conservation Society. All rights reserved.</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Us</h4>
+                    <p>Dedicated to environmental conservation and sustainable practices.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="initiatives.html">Initiatives</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <p>Email: info@environmental-conservation.org</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Shemsa Environmental Conservation Company. All rights reserved.</p>
+            </div>
         </div>
     </footer>
-</body>
 
+    <script src="js/main.js"></script>
+</body>
 </html>
