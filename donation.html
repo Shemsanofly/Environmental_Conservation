@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Support our conservation mission - Donate to Global Environmental Conservation Initiative">
+    <title>Donate | GECI - Global Environmental Conservation Initiative</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .donation-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .donation-header h1 {
+            font-size: 42px;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .donation-header p {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .donation-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            border: 2px solid var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .donation-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .donation-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .donation-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-5px);
+        }
+
+        .donation-card.featured {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-lg);
+            transform: scale(1.05);
+        }
+
+        .badge-featured {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .donation-amount {
+            font-size: 48px;
+            color: var(--primary-color);
+            font-weight: 900;
+            margin: 20px 0;
+        }
+
+        .donation-description {
+            color: var(--text-light);
+            font-size: 14px;
+            margin: 20px 0;
+            line-height: 1.6;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .donation-impact {
+            background: #f5f7fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .donation-btn {
+            padding: 14px 40px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .donation-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .custom-donation {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .custom-donation h3 {
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .custom-amount-input {
+            font-size: 18px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .custom-amount-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .sponsor-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .sponsor-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .sponsor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .sponsor-card h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .sponsor-card p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .sponsor-benefits {
+            text-align: left;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .sponsor-benefits li {
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .sponsor-btn {
+            padding: 12px 30px;
+            background: white;
+            color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .sponsor-btn:hover {
+            background: #f5f7fa;
+            transform: translateY(-2px);
+        }
+
+        .payment-methods {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .payment-methods h3 {
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .payment-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .payment-icon {
+            width: 80px;
+            height: 50px;
+            background: #f5f7fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .payment-icon:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .thank-you-message {
+            background: #e8f5e9;
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Premium Navigation Header -->
+    <header class="header" id="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo-section">
+                    <img src="images/logo.jpg" alt="Global Environmental Conservation Initiative Logo" class="logo">
+                    <div class="company-info">
+                        <h1 class="company-title">GECI</h1>
+                        <p class="company-subtitle">Global Conservation Initiative</p>
+                    </div>
+                </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="initiatives.html" class="nav-link">Initiatives</a></li>
+                    <li class="nav-item"><a href="about.html" class="nav-link">About Us</a></li>
+                    <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+                </ul>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Donation Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2 class="hero-title">Support Our Conservation Mission</h2>
+            <p class="hero-subtitle">Your contribution helps us protect ecosystems and empower communities worldwide</p>
+        </div>
+    </section>
+
+    <!-- Main Donation Content -->
+    <section style="padding: 80px 20px; background-color: #f5f7fa;">
+        <div class="container">
+            <div class="donation-header">
+                <h1>Make an Impact Today</h1>
+                <p>Every contribution, no matter the size, directly supports our conservation programs and community initiatives</p>
+            </div>
+
+            <div class="thank-you-message">
+                <strong>🌱 Thank you for your support!</strong> Your donation ensures a better future for our planet and communities.
+            </div>
+
+            <!-- Donation Tabs -->
+            <div class="donation-tabs">
+                <button class="tab-btn active" onclick="switchTab('donate')">Make a Donation</button>
+                <button class="tab-btn" onclick="switchTab('sponsor')">Become a Sponsor</button>
+            </div>
+
+            <!-- Donation Tab -->
+            <div id="donate" class="tab-content active">
+                <div class="donation-options">
+                    <div class="donation-card">
+                        <h3 style="color: var(--primary-color);">Bronze Donor</h3>
+                        <div class="donation-amount">$25</div>
+                        <p class="donation-description">Support small conservation projects</p>
+                        <div class="donation-impact">
+                            ✓ Plant trees in local areas<br>
+                            ✓ Community cleanup support<br>
+                            ✓ Educational materials
+                        </div>
+                        <button class="donation-btn" onclick="processDonation(25)">Donate $25</button>
+                    </div>
+
+                    <div class="donation-card featured">
+                        <div class="badge-featured">MOST POPULAR</div>
+                        <h3 style="color: var(--primary-color);">Silver Donor</h3>
+                        <div class="donation-amount">$50</div>
+                        <p class="donation-description">Support major conservation initiatives</p>
+                        <div class="donation-impact">
+                            ✓ Habitat restoration projects<br>
+                            ✓ Wildlife protection programs<br>
+                            ✓ Exclusive updates & reports
+                        </div>
+                        <button class="donation-btn" onclick="processDonation(50)">Donate $50</button>
+                    </div>
+
+                    <div class="donation-card">
+                        <h3 style="color: var(--primary-color);">Gold Donor</h3>
+                        <div class="donation-amount">$100</div>
+                        <p class="donation-description">Lead major ecosystem protection</p>
+                        <div class="donation-impact">
+                            ✓ Large-scale conservation work<br>
+                            ✓ Donor recognition<br>
+                            ✓ Annual impact report
+                        </div>
+                        <button class="donation-btn" onclick="processDonation(100)">Donate $100</button>
+                    </div>
+
+                    <div class="donation-card">
+                        <h3 style="color: var(--primary-color);">Platinum Donor</h3>
+                        <div class="donation-amount">$500</div>
+                        <p class="donation-description">Transform environmental future</p>
+                        <div class="donation-impact">
+                            ✓ Major project sponsorship<br>
+                            ✓ Board recognition<br>
+                            ✓ Personal impact briefing
+                        </div>
+                        <button class="donation-btn" onclick="processDonation(500)">Donate $500</button>
+                    </div>
+
+                    <div class="donation-card">
+                        <h3 style="color: var(--primary-color);">Diamond Donor</h3>
+                        <div class="donation-amount">$1000+</div>
+                        <p class="donation-description">Shape global conservation</p>
+                        <div class="donation-impact">
+                            ✓ Project naming opportunity<br>
+                            ✓ VIP recognition<br>
+                            ✓ Strategic consultation
+                        </div>
+                        <button class="donation-btn" onclick="processDonation(1000)">Donate $1000+</button>
+                    </div>
+
+                    <div class="custom-donation">
+                        <h3>Custom Amount</h3>
+                        <p>Enter your own donation amount</p>
+                        <input type="number" id="customAmount" class="custom-amount-input" placeholder="Enter amount ($)" min="1">
+                        <button class="donation-btn" onclick="processCustomDonation()">Donate Custom Amount</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sponsor Tab -->
+            <div id="sponsor" class="tab-content">
+                <div class="sponsor-options">
+                    <div class="sponsor-card">
+                        <h3>Green Sponsor</h3>
+                        <p>Annual commitment for ongoing support</p>
+                        <ul class="sponsor-benefits" style="list-style: none; padding: 0;">
+                            <li>✓ $500 annual sponsorship</li>
+                            <li>✓ Company logo on website</li>
+                            <li>✓ Social media recognition</li>
+                            <li>✓ Quarterly progress reports</li>
+                            <li>✓ Certificate of sponsorship</li>
+                        </ul>
+                        <button class="sponsor-btn" onclick="processSponsor('Green', 500)">Become Green Sponsor</button>
+                    </div>
+
+                    <div class="sponsor-card" style="transform: scale(1.05);">
+                        <h3>Eco Sponsor</h3>
+                        <p>Premium annual sponsorship package</p>
+                        <ul class="sponsor-benefits" style="list-style: none; padding: 0;">
+                            <li>✓ $1500 annual sponsorship</li>
+                            <li>✓ Prominent logo placement</li>
+                            <li>✓ Monthly newsletters</li>
+                            <li>✓ Annual partnership event</li>
+                            <li>✓ Co-branding opportunities</li>
+                        </ul>
+                        <button class="sponsor-btn" onclick="processSponsor('Eco', 1500)">Become Eco Sponsor</button>
+                    </div>
+
+                    <div class="sponsor-card">
+                        <h3>Earth Guardian Sponsor</h3>
+                        <p>Exclusive premium sponsorship</p>
+                        <ul class="sponsor-benefits" style="list-style: none; padding: 0;">
+                            <li>✓ $5000+ annual sponsorship</li>
+                            <li>✓ Featured partner status</li>
+                            <li>✓ Custom collaboration projects</li>
+                            <li>✓ Executive recognition</li>
+                            <li>✓ Strategic partnership role</li>
+                        </ul>
+                        <button class="sponsor-btn" onclick="processSponsor('Guardian', 5000)">Become Guardian Sponsor</button>
+                    </div>
+                </div>
+
+                <div class="custom-donation" style="margin-top: 40px;">
+                    <h3>Custom Sponsorship</h3>
+                    <p>Contact us for customized sponsorship packages</p>
+                    <a href="contact.html" class="donation-btn" style="background: var(--primary-color); color: white; text-decoration: none; display: inline-block; padding: 14px 40px;">Contact for Custom Package</a>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="payment-methods">
+                <h3>Secure Payment Methods</h3>
+                <div class="payment-icons">
+                    <div class="payment-icon" title="PayPal">PayPal</div>
+                    <div class="payment-icon" title="Stripe">Stripe</div>
+                    <div class="payment-icon" title="Credit Card">Credit Card</div>
+                    <div class="payment-icon" title="Bank Transfer">Bank Transfer</div>
+                    <div class="payment-icon" title="Mobile Money">Mobile Money</div>
+                </div>
+            </div>
+
+            <!-- Trust Message -->
+            <div style="background: white; padding: 30px; border-radius: 12px; margin-top: 40px; text-align: center; box-shadow: var(--shadow);">
+                <h3 style="color: var(--primary-color); margin-bottom: 15px;">✓ 100% Transparency & Trust</h3>
+                <p style="color: var(--text-light); margin: 0;">
+                    All donations are secure and go directly to our conservation programs. <br>
+                    We are registered and compliant with all regulations.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About Us</h4>
+                <p>Dedicated to environmental conservation and sustainable practices worldwide.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="initiatives.html">Initiatives</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="terms-of-service.html">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Info</h4>
+                <p>Email: aminshemsa@gmail.com</p>
+                <p>Phone: +255 621 214 785</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Global Environmental Conservation Initiative. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Process Standard Donation
+        async function processDonation(amount) {
+            try {
+                const response = await fetch('/api/donations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount, donationType: 'standard' })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Unable to record donation intent.');
+                }
+
+                alert(`Thank you for your interest in donating $${amount}!\n\nYour donation intent has been recorded.\nWe will reach out with payment instructions or you can proceed with your preferred payment method.`);
+            } catch (error) {
+                alert('Sorry, we could not process your request right now. Please try again later.');
+            }
+        }
+
+        // Process Custom Donation
+        function processCustomDonation() {
+            const customAmount = document.getElementById('customAmount').value;
+            
+            if (!customAmount || customAmount <= 0) {
+                alert('Please enter a valid donation amount');
+                return;
+            }
+            
+            processDonation(customAmount);
+        }
+
+        // Process Sponsorship
+        async function processSponsor(sponsorType, amount) {
+            try {
+                const response = await fetch('/api/sponsors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sponsorType, amount })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Unable to record sponsor intent.');
+                }
+
+                alert(`Thank you for your interest in becoming a ${sponsorType} Sponsor!\n\nYour sponsorship intent has been recorded.\nWe will contact you with next steps.`);
+            } catch (error) {
+                alert('Sorry, we could not process your request right now. Please try again later.');
+            }
+        }
+
+        // Initialize hamburger menu
+        function initHamburgerMenu() {
+            const hamburger = document.getElementById('hamburger');
+            const navMenu = document.getElementById('navMenu');
+
+            if (!hamburger) return;
+
+            hamburger.addEventListener('click', function () {
+                navMenu.classList.toggle('active');
+                hamburger.classList.toggle('active');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    navMenu.classList.remove('active');
+                    hamburger.classList.remove('active');
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initHamburgerMenu);
+    </script>
+</body>
+</html>

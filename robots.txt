@@ -1,0 +1,23 @@
+# Robots.txt for Global Environmental Conservation Initiative
+# This file helps search engines crawl and index the website
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+
+# Specific rules for common crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Delay for aggressive crawlers
+User-agent: AhrefsBot
+User-agent: SemrushBot
+Crawl-delay: 10
+
+# Sitemap location
+Sitemap: https://www.example.com/sitemap.xml

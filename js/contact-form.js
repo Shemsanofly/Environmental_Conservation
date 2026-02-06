@@ -289,7 +289,7 @@ function handleFormSubmit(event) {
             timestamp: new Date().toISOString()
         };
 
-        // Simulate form submission (in a real app, this would send to a server)
+        // Submit to backend
         submitFormData(formData);
     }
 }
@@ -298,35 +298,35 @@ function handleFormSubmit(event) {
  * Process form submission
  * @param {Object} formData - The form data to submit
  */
-function submitFormData(formData) {
+async function submitFormData(formData) {
     // Disable submit button
     const submitBtn = document.getElementById('submitBtn');
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending...';
 
-    // Simulate network request
-    setTimeout(() => {
-        // Log form data
-        console.log('Form Data Submitted:', formData);
+    try {
+        const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
 
-        // Store in localStorage for demonstration
-        let submissions = JSON.parse(localStorage.getItem('contactFormSubmissions') || '[]');
-        submissions.push(formData);
-        localStorage.setItem('contactFormSubmissions', JSON.stringify(submissions));
+        if (!response.ok) {
+            throw new Error('Unable to send message. Please try again.');
+        }
 
-        // Show success message
         showSuccess('Thank you for your message! We will contact you soon at ' + formData.email);
 
         // Reset form
         document.getElementById('contactForm').reset();
         document.getElementById('charCount').textContent = '0';
-
-        // Re-enable submit button
+    } catch (error) {
+        showError('messageError', error.message || 'Unable to send message.');
+    } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
-
-    }, 1500); // Simulate network delay
+    }
 }
 
 // ===================================

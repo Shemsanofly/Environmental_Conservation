@@ -239,6 +239,40 @@ function initReadMoreButtons() {
 // ===================================
 
 /**
+ * Newsletter subscription handler
+ * Processes email subscriptions and provides user feedback
+ */
+function handleNewsletterSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const emailInput = form.querySelector('.newsletter-input');
+    const email = emailInput.value.trim();
+
+    // Validate email
+    if (!email || !isValidEmail(email)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+
+    // Store subscription (in production, send to server)
+    console.log('Newsletter subscription:', email);
+    
+    // Show success message
+    alert('Thank you for subscribing! You will receive updates about our conservation initiatives.');
+    
+    // Reset form
+    form.reset();
+}
+
+/**
+ * Validate email format
+ */
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+/**
  * Initialize all functions when DOM is loaded
  */
 document.addEventListener('DOMContentLoaded', function () {

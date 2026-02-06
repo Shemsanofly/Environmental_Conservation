@@ -1517,7 +1517,190 @@ body {
     .mission-grid,
     .team-grid,
     .challenges-grid,
-    .solutions-grid {
+    .solutions-grid,
+    .testimonials-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ===================================
+   TESTIMONIALS SECTION
+   =================================== */
+.testimonials-section {
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.testimonial-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    border-left: 4px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.testimonial-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.testimonial-author {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.testimonial-author strong {
+    color: var(--primary-color);
+    font-size: 16px;
+}
+
+.testimonial-author span {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.testimonial-rating {
+    font-size: 18px;
+    color: #f39c12;
+}
+
+/* ===================================
+   NEWSLETTER SECTION
+   =================================== */
+.newsletter-section {
+    padding: 70px 20px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: white;
+}
+
+.newsletter-content {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.newsletter-content h2 {
+    color: white;
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+.newsletter-content p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 18px;
+    margin-bottom: 40px;
+}
+
+.subscription-method-single {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-youtube-large {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 50px;
+    background: #FF0000;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 18px;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-youtube-large:hover {
+    background: #CC0000;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4);
+}
+
+.btn-youtube-large span {
+    font-size: 20px;
+}
+
+.youtube-note {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+
+/* ===================================
+   DONATION SECTION
+   =================================== */
+.donation-section {
+    padding: 70px 20px;
+    background-color: #f5f7fa;
+}
+
+.donation-content {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.donation-content h2 {
+    color: var(--text-dark);
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+.donation-content p {
+    color: var(--text-light);
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.donation-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.donation-buttons .btn {
+    padding: 15px 40px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.donation-info {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+    box-shadow: var(--shadow);
+}
+
+.donation-info p {
+    color: var(--text-dark);
+    margin: 0;
 }
