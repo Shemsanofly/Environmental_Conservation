@@ -93,6 +93,12 @@ This project now includes a lightweight backend that stores:
 2. Install dependencies
 3. Run the server
 
+Add payment keys for Flutterwave in `.env`:
+
+```
+FLW_SECRET_KEY=your_flutterwave_secret_key
+```
+
 ### Admin Dashboard
 
 Open `/admin` in the browser and enter your admin key to view user data.

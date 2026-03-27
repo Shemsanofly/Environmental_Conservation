@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Report environmental incidents with GPS location to GECI">
+    <title>Report Incident | GECI</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .report-section { padding: 80px 20px; background: #f5f7fa; }
+        .report-card { max-width: 900px; margin: 0 auto; background: white; border-radius: 12px; padding: 32px; box-shadow: var(--shadow); }
+        .report-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .report-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .report-field input, .report-field select, .report-field textarea { padding: 12px; border: 1px solid #d9dee5; border-radius: 8px; }
+        .location-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+        .location-chip { background: #eef8f4; color: var(--primary-color); padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+        .report-status { display: none; padding: 14px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; }
+        .report-status.success { display: block; background: #e8f5e9; color: #1b5e20; }
+        .report-status.error { display: block; background: #fff4f4; color: #b9382b; }
+        .map-link { display: none; }
+    </style>
+</head>
+<body>
+    <header class="header" id="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo-section">
+                    <img src="images/logo.jpg" alt="Global Environmental Conservation Initiative Logo" class="logo">
+                    <div class="company-info">
+                        <h1 class="company-title">GECI</h1>
+                        <p class="company-subtitle">Global Conservation Initiative</p>
+                    </div>
+                </div>
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="initiatives.html" class="nav-link">Initiatives</a></li>
+                    <li class="nav-item"><a href="donation.html" class="nav-link">Donate</a></li>
+                    <li class="nav-item"><a href="report.html" class="nav-link active">Report Incident</a></li>
+                    <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+                </ul>
+                <div class="hamburger" id="hamburger">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h2 class="hero-title">Report Environmental Incident</h2>
+            <p class="hero-subtitle">Send real-time incident reports with location so our team can act faster.</p>
+        </div>
+    </section>
+
+    <section class="report-section">
+        <div class="report-card">
+            <div id="reportStatus" class="report-status"></div>
+            <form id="incidentReportForm">
+                <div class="report-grid">
+                    <div class="report-field">
+                        <label for="reporterName">Full Name *</label>
+                        <input id="reporterName" type="text" required minlength="3" placeholder="Your name">
+                    </div>
+                    <div class="report-field">
+                        <label for="reporterEmail">Email *</label>
+                        <input id="reporterEmail" type="email" required placeholder="you@example.com">
+                    </div>
+                    <div class="report-field">
+                        <label for="reporterPhone">Phone</label>
+                        <input id="reporterPhone" type="tel" placeholder="+255...">
+                    </div>
+                    <div class="report-field">
+                        <label for="reportType">Incident Type *</label>
+                        <select id="reportType" required>
+                            <option value="">Select type</option>
+                            <option value="Illegal logging">Illegal logging</option>
+                            <option value="Pollution">Pollution</option>
+                            <option value="Wildlife threat">Wildlife threat</option>
+                            <option value="Forest fire">Forest fire</option>
+                            <option value="Water contamination">Water contamination</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="report-field">
+                        <label for="severity">Severity *</label>
+                        <select id="severity" required>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="report-field">
+                        <label for="locationLabel">Location Description</label>
+                        <input id="locationLabel" type="text" placeholder="Village, district, landmark...">
+                    </div>
+                </div>
+
+                <div class="location-row">
+                    <button type="button" class="btn btn-secondary" id="captureLocationBtn">Use My Current Location</button>
+                    <span id="locationPreview" class="location-chip">No GPS captured yet</span>
+                    <a id="mapsLink" href="#" target="_blank" rel="noopener" class="map-link">Open in map</a>
+                </div>
+
+                <div class="report-field">
+                    <label for="description">Incident Description *</label>
+                    <textarea id="description" rows="6" required minlength="20" placeholder="Explain what happened, when, and what is at risk."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit Report</button>
+            </form>
+        </div>
+    </section>
+
+    <script src="js/main.js"></script>
+    <script src="js/report.js"></script>
+</body>
+</html>

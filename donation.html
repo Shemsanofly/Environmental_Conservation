@@ -179,6 +179,75 @@
             border-color: var(--primary-color);
         }
 
+        .donor-details {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .donor-details h3 {
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        .donor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .donor-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .donor-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .donor-input,
+        .donor-select {
+            padding: 12px 14px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .donor-input:focus,
+        .donor-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .payment-status {
+            display: none;
+            padding: 16px 18px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .payment-status.success {
+            display: block;
+            background: #e8f5e9;
+            border-left: 4px solid var(--primary-color);
+            color: var(--text-dark);
+        }
+
+        .payment-status.error {
+            display: block;
+            background: #fff4f4;
+            border-left: 4px solid #e74c3c;
+            color: #b9382b;
+        }
+
         .sponsor-options {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -307,6 +376,7 @@
                 <ul class="nav-menu" id="navMenu">
                     <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
                     <li class="nav-item"><a href="initiatives.html" class="nav-link">Initiatives</a></li>
+                    <li class="nav-item"><a href="report.html" class="nav-link">Report Incident</a></li>
                     <li class="nav-item"><a href="about.html" class="nav-link">About Us</a></li>
                     <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
                 </ul>
@@ -341,12 +411,54 @@
 
             <!-- Donation Tabs -->
             <div class="donation-tabs">
-                <button class="tab-btn active" onclick="switchTab('donate')">Make a Donation</button>
-                <button class="tab-btn" onclick="switchTab('sponsor')">Become a Sponsor</button>
+                <button class="tab-btn active" onclick="switchTab('donate', event)">Make a Donation</button>
+                <button class="tab-btn" onclick="switchTab('sponsor', event)">Become a Sponsor</button>
             </div>
 
             <!-- Donation Tab -->
             <div id="donate" class="tab-content active">
+                <div id="paymentStatus" class="payment-status"></div>
+
+                <div class="donor-details">
+                    <h3>Donation Details</h3>
+                    <div class="donor-grid">
+                        <div class="donor-field">
+                            <label class="donor-label" for="donorName">Full Name (optional)</label>
+                            <input type="text" id="donorName" class="donor-input" placeholder="Your name">
+                        </div>
+                        <div class="donor-field">
+                            <label class="donor-label" for="donorEmail">Email (required)</label>
+                            <input type="email" id="donorEmail" class="donor-input" placeholder="you@example.com" required>
+                        </div>
+                        <div class="donor-field">
+                            <label class="donor-label" for="donorPhone">Phone (optional)</label>
+                            <input type="tel" id="donorPhone" class="donor-input" placeholder="+255">
+                        </div>
+                        <div class="donor-field">
+                            <label class="donor-label" for="paymentMethod">Payment Method (required)</label>
+                            <select id="paymentMethod" class="donor-select" required>
+                                <option value="" selected>Select a payment method</option>
+                                <option value="mobilemoneytanzania">Mobile Money (Tanzania)</option>
+                                <option value="banktransfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="donor-field">
+                            <label class="donor-label" for="currencySelect">Currency</label>
+                            <select id="currencySelect" class="donor-select">
+                                <option value="TZS" selected>TZS</option>
+                                <option value="USD">USD</option>
+                            </select>
+                        </div>
+                        <div class="donor-field">
+                            <label class="donor-label" for="isRecurring">Monthly Giving</label>
+                            <div style="display:flex;align-items:center;gap:8px;padding-top:8px;">
+                                <input type="checkbox" id="isRecurring">
+                                <span style="font-size:14px;color:var(--text-light);">Make this a recurring monthly donation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="donation-options">
                     <div class="donation-card">
                         <h3 style="color: var(--primary-color);">Bronze Donor</h3>
@@ -525,98 +637,7 @@
         </div>
     </footer>
 
-    <script>
-        // Tab Switching
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
-            
-            // Add active class to clicked button
-            event.target.classList.add('active');
-        }
-
-        // Process Standard Donation
-        async function processDonation(amount) {
-            try {
-                const response = await fetch('/api/donations', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount, donationType: 'standard' })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Unable to record donation intent.');
-                }
-
-                alert(`Thank you for your interest in donating $${amount}!\n\nYour donation intent has been recorded.\nWe will reach out with payment instructions or you can proceed with your preferred payment method.`);
-            } catch (error) {
-                alert('Sorry, we could not process your request right now. Please try again later.');
-            }
-        }
-
-        // Process Custom Donation
-        function processCustomDonation() {
-            const customAmount = document.getElementById('customAmount').value;
-            
-            if (!customAmount || customAmount <= 0) {
-                alert('Please enter a valid donation amount');
-                return;
-            }
-            
-            processDonation(customAmount);
-        }
-
-        // Process Sponsorship
-        async function processSponsor(sponsorType, amount) {
-            try {
-                const response = await fetch('/api/sponsors', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sponsorType, amount })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Unable to record sponsor intent.');
-                }
-
-                alert(`Thank you for your interest in becoming a ${sponsorType} Sponsor!\n\nYour sponsorship intent has been recorded.\nWe will contact you with next steps.`);
-            } catch (error) {
-                alert('Sorry, we could not process your request right now. Please try again later.');
-            }
-        }
-
-        // Initialize hamburger menu
-        function initHamburgerMenu() {
-            const hamburger = document.getElementById('hamburger');
-            const navMenu = document.getElementById('navMenu');
-
-            if (!hamburger) return;
-
-            hamburger.addEventListener('click', function () {
-                navMenu.classList.toggle('active');
-                hamburger.classList.toggle('active');
-            });
-
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function () {
-                    navMenu.classList.remove('active');
-                    hamburger.classList.remove('active');
-                });
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', initHamburgerMenu);
-    </script>
+    <script src="js/main.js"></script>
+    <script src="js/donation.js"></script>
 </body>
 </html>
