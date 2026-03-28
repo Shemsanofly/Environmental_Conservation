@@ -152,7 +152,7 @@ const sendHtml = (res, fileName) => {
 
 // Pages
 app.get('/', (req, res) => sendHtml(res, 'index.html'));
-app.get('/index', (req, res) => sendHtml(res, 'index.html'));
+app.get('/home', (req, res) => sendHtml(res, 'index.html'));
 app.get('/about', (req, res) => sendHtml(res, 'about.html'));
 app.get('/contact', (req, res) => sendHtml(res, 'contact.html'));
 app.get('/donation', (req, res) => sendHtml(res, 'donation.html'));
