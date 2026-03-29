@@ -28,6 +28,8 @@ const FLW_SECRET_KEY = process.env.FLW_SECRET_KEY || '';
 const FLW_BASE_URL = process.env.FLW_BASE_URL || 'https://api.flutterwave.com/v3';
 const PAYMENT_MODE = String(process.env.PAYMENT_MODE || 'live').trim().toLowerCase();
 const IS_DEMO_MODE = PAYMENT_MODE === 'demo';
+const OPENAI_API_KEY = String(process.env.OPENAI_API_KEY || '').trim();
+const GIPHY_API_KEY = String(process.env.GIPHY_API_KEY || 'dc6zaTOxFJmzC').trim();
 
 function postJson(url, payload, headers = {}) {
     return new Promise((resolve, reject) => {
@@ -109,6 +111,72 @@ function getJson(url, headers = {}) {
     });
 }
 
+function parseDataUrl(dataUrl) {
+    if (typeof dataUrl !== 'string') {
+        return null;
+    }
+
+    const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+    if (!match) {
+        return null;
+    }
+
+    return {
+        mimeType: String(match[1] || '').toLowerCase(),
+        buffer: Buffer.from(match[2], 'base64')
+    };
+}
+
+function extensionFromMimeType(mimeType) {
+    const type = String(mimeType || '').toLowerCase();
+    if (type.includes('webm')) return 'webm';
+    if (type.includes('mpeg')) return 'mp3';
+    if (type.includes('mp3')) return 'mp3';
+    if (type.includes('wav')) return 'wav';
+    if (type.includes('ogg')) return 'ogg';
+    if (type.includes('m4a')) return 'm4a';
+    return 'webm';
+}
+
+async function transcribeAudioAttachment(audioItem) {
+    if (!audioItem || typeof audioItem.dataUrl !== 'string' || !audioItem.dataUrl.startsWith('data:audio/')) {
+        return '';
+    }
+
+    const parsed = parseDataUrl(audioItem.dataUrl);
+    if (!parsed || !parsed.buffer || parsed.buffer.length === 0) {
+        return '';
+    }
+
+    if (typeof fetch !== 'function' || typeof FormData === 'undefined' || typeof Blob === 'undefined') {
+        throw new Error('Audio transcription is not supported in this Node runtime');
+    }
+
+    const form = new FormData();
+    form.append('model', 'gpt-4o-mini-transcribe');
+    form.append('response_format', 'json');
+    form.append('file', new Blob([parsed.buffer], { type: parsed.mimeType }), `voice.${extensionFromMimeType(parsed.mimeType)}`);
+
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`
+        },
+        body: form
+    });
+
+    const body = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        const errorMessage = body && body.error && body.error.message
+            ? body.error.message
+            : 'Failed to transcribe audio';
+        throw new Error(errorMessage);
+    }
+
+    return String(body && body.text ? body.text : '').trim();
+}
+
 function createTxRef() {
     if (crypto.randomUUID) {
         return `geci-${crypto.randomUUID()}`;
@@ -120,7 +188,7 @@ app.use(helmet({
     contentSecurityPolicy: false
 }));
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '8mb' }));
 app.use(express.urlencoded({ extended: false }));
 
 app.use(rateLimit({
@@ -188,6 +256,191 @@ app.get('/api/health', (req, res) => {
         paymentMode: PAYMENT_MODE,
         canProcessRealPayments: Boolean(FLW_SECRET_KEY) && !IS_DEMO_MODE
     });
+});
+
+app.get('/api/gifs/search', async (req, res) => {
+    const query = String(req.query.q || '').trim();
+    const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 24);
+    const encodedQuery = encodeURIComponent(query || 'environment nature');
+    const endpoint = `https://api.giphy.com/v1/gifs/search?api_key=${encodeURIComponent(GIPHY_API_KEY)}&q=${encodedQuery}&limit=${limit}&rating=g&lang=en`;
+
+    const fallback = [
+        { id: 'fallback-1', title: 'Nature', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTZqMnR5eWdxOGQ0a2lyM2VtY2N4NW95OHZtMHBxMXB2b3I1a2Q5eiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KxseCTOPVykYvG2V4R/giphy.gif' },
+        { id: 'fallback-2', title: 'Earth', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExY3doaWpwM2xwa2M3bTFtY3h4OHlyM3VxYmx6dnhlMm12dG1rZXU2diZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l4FGuhL4U2WyjdkaY/giphy.gif' },
+        { id: 'fallback-3', title: 'Recycle', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdXJ4NXZxZmR4N2Q5NHNscW1zZmRjN3N2bzA2eHQxMjQxN2VnZ2Z6NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3o6Zt481isNVuQI1l6/giphy.gif' },
+        { id: 'fallback-4', title: 'Green', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2NteXhoaWo0azk1MmsxZ2N2MmZpZDlnN3VjNDAwY2Rlb2F2N2Y1aiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0HlQ7LRalQqdWfao/giphy.gif' }
+    ];
+
+    try {
+        const response = await getJson(endpoint);
+        const data = Array.isArray(response && response.data) ? response.data : [];
+        const items = data
+            .map((gif) => {
+                const img = gif && gif.images && gif.images.fixed_width;
+                const url = img && img.url ? img.url : null;
+                return url
+                    ? { id: String(gif.id || ''), title: String(gif.title || 'GIF'), url }
+                    : null;
+            })
+            .filter(Boolean)
+            .slice(0, limit);
+
+        return res.json({ items: items.length ? items : fallback.slice(0, limit) });
+    } catch (error) {
+        return res.json({ items: fallback.slice(0, limit) });
+    }
+});
+
+// Chatbot API Endpoint
+app.post('/api/chat', async (req, res) => {
+    const { message, attachments } = req.body || {};
+
+    const userMessage = String(message || '').trim();
+    const attachmentList = Array.isArray(attachments) ? attachments.slice(0, 5) : [];
+    const audioAttachments = attachmentList.filter((item) => String(item && item.kind ? item.kind : '').toLowerCase() === 'audio');
+
+    if (!userMessage && attachmentList.length === 0) {
+        return res.status(400).json({ error: 'Message or attachment is required' });
+    }
+
+    // Demo mode responses (when no valid API key)
+    if (!OPENAI_API_KEY || OPENAI_API_KEY === 'your_openai_api_key_here') {
+        const demoResponses = {
+            'climate': 'Climate change is one of the most pressing environmental challenges of our time. Rising global temperatures are causing extreme weather events, sea level rise, and ecosystem disruption. To combat climate change, we need to reduce greenhouse gas emissions through renewable energy adoption, sustainable transportation, and responsible consumption. Every individual action counts—from carpooling to supporting environmental organizations like GECI.',
+            'trees': 'Trees are essential for our planet! They absorb CO2, produce oxygen, prevent soil erosion, and provide habitats for wildlife. Deforestation threatens biodiversity and accelerates climate change. We can help by supporting reforestation efforts, planting trees in our communities, and protecting existing forests. GECI works with communities to restore degraded lands.',
+            'plastic': 'Plastic pollution is a major environmental crisis. Millions of tons of plastic end up in our oceans yearly, harming marine life and polluting ecosystems. Reduce plastic use by choosing reusable products, avoiding single-use plastics, and supporting plastic-reduction initiatives. Recycling and proper waste management are also crucial steps.',
+            'renewable': 'Renewable energy sources like solar, wind, and hydroelectric power are sustainable alternatives to fossil fuels. They reduce greenhouse gas emissions and help combat climate change. Many countries are transitioning to renewable energy, creating green jobs and reducing energy costs. Supporting renewable energy adoption is critical for a sustainable future.',
+            'conservation': 'Environmental conservation aims to protect and restore natural ecosystems. It involves protecting wildlife habitats, preserving biodiversity, and managing natural resources sustainably. Conservation efforts include creating protected areas, restoring degraded habitats, and supporting endangered species recovery programs.',
+            'sustainable': 'Sustainability means meeting our current needs without compromising future generations\' ability to meet theirs. It involves responsible resource management, reducing waste, protecting ecosystems, and promoting social equity. Sustainable practices include circular economy principles, ethical consumption, and environmental stewardship.',
+            'pollution': 'Pollution—air, water, and soil—harms ecosystems and human health. Sources include industrial emissions, vehicle exhaust, agricultural runoff, and improper waste disposal. Solutions include stricter environmental regulations, sustainable industry practices, renewable energy adoption, and individual actions like reducing emissions and proper waste disposal.',
+            'biodiversity': 'Biodiversity—the variety of life on Earth—is crucial for ecosystem health and human survival. Threats include habitat loss, climate change, and pollution. We can protect biodiversity by supporting conservation efforts, protecting natural habitats, reducing our ecological footprint, and supporting organizations like GECI.'
+        };
+
+        // Find matching response
+        const lowerMessage = userMessage.toLowerCase();
+        let reply = null;
+
+        for (const [key, value] of Object.entries(demoResponses)) {
+            if (lowerMessage.includes(key)) {
+                reply = value;
+                break;
+            }
+        }
+
+        // Default response if no keyword match
+        if (!reply) {
+            reply = 'That\'s a great environmental question! While I\'m running in demo mode, I can help with topics like climate change, trees, plastic pollution, renewable energy, conservation, sustainability, biodiversity, and pollution. Feel free to ask me about any of these topics, or add your real OpenAI API key to .env for more detailed AI responses.';
+        }
+
+        if (!reply && attachmentList.length > 0) {
+            reply = 'I can see you attached files. In demo mode I can still help by discussing the content if you also include a short text description of what you want me to analyze.';
+        }
+
+        if (audioAttachments.length > 0) {
+            reply = `I heard you sent a voice message. Demo mode cannot transcribe audio yet. Please add a short typed message, and I will still help with your environmental question.\n\n${reply}`;
+        }
+
+        return res.json({ reply });
+    }
+
+    // Real OpenAI mode
+    try {
+        const userContent = [];
+        const documentNotes = [];
+        let audioTranscript = '';
+
+        if (audioAttachments.length > 0) {
+            try {
+                audioTranscript = await transcribeAudioAttachment(audioAttachments[0]);
+            } catch (error) {
+                audioTranscript = '';
+            }
+        }
+
+        if (userMessage) {
+            userContent.push({ type: 'text', text: userMessage });
+        }
+
+        if (audioTranscript) {
+            userContent.push({ type: 'text', text: `User voice transcript: ${audioTranscript}` });
+        }
+
+        attachmentList.forEach((item, index) => {
+            const kind = String(item && item.kind ? item.kind : '').toLowerCase();
+            const name = String(item && item.name ? item.name : `attachment-${index + 1}`);
+            const mimeType = String(item && item.mimeType ? item.mimeType : '').toLowerCase();
+
+            if ((kind === 'image' || kind === 'gif') && typeof item.dataUrl === 'string' && item.dataUrl.startsWith('data:image/')) {
+                userContent.push({
+                    type: 'image_url',
+                    image_url: {
+                        url: item.dataUrl
+                    }
+                });
+                return;
+            }
+
+            if (kind === 'gif_remote' && typeof item.url === 'string' && item.url.startsWith('http')) {
+                userContent.push({
+                    type: 'image_url',
+                    image_url: {
+                        url: item.url
+                    }
+                });
+                return;
+            }
+
+            if (kind === 'document') {
+                if (typeof item.textContent === 'string' && item.textContent.trim()) {
+                    documentNotes.push(`Document: ${name}\n${item.textContent.trim().slice(0, 12000)}`);
+                } else {
+                    documentNotes.push(`Document: ${name} (${mimeType || 'unknown type'}) was attached but no readable text was provided.`);
+                }
+            }
+        });
+
+        if (documentNotes.length > 0) {
+            userContent.push({
+                type: 'text',
+                text: `Attached document content:\n\n${documentNotes.join('\n\n---\n\n')}`
+            });
+        }
+
+        if (userContent.length === 0) {
+            userContent.push({ type: 'text', text: 'Please analyze the attached file(s).' });
+        }
+
+        const payload = {
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: 'You are a knowledgeable and friendly environmental conservation assistant. Your role is to provide accurate, helpful information about environmental issues, climate change, sustainability, conservation efforts, and green practices. Always provide factual information and encourage positive environmental actions. Keep responses concise (2-3 paragraphs max) and engaging.'
+                },
+                {
+                    role: 'user',
+                    content: userContent
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 500
+        };
+
+        const response = await postJson('https://api.openai.com/v1/chat/completions', payload, {
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+        });
+
+        const aiReply = response.choices?.[0]?.message?.content || 'I could not generate a response. Please try again.';
+        const reply = audioTranscript
+            ? `I heard you say: "${audioTranscript}"\n\n${aiReply}`
+            : aiReply;
+        return res.json({ reply });
+    } catch (error) {
+        console.error('Chat endpoint error:', error.message);
+        return res.json({
+            reply: 'I am temporarily unable to reach the AI service right now. Here is a quick environmental tip: focus on reducing single-use plastics, conserving electricity, and supporting local tree-planting efforts. You can ask me again in a moment.'
+        });
+    }
 });
 
 app.post('/api/contact', async (req, res) => {
