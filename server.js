@@ -220,17 +220,16 @@ const sendHtml = (res, fileName) => {
 
 // Pages
 app.get('/', (req, res) => sendHtml(res, 'index.html'));
-app.get('/index.html', (req, res) => sendHtml(res, 'index.html'));
-app.get('/about.html', (req, res) => sendHtml(res, 'about.html'));
-app.get('/contact.html', (req, res) => sendHtml(res, 'contact.html'));
-app.get('/donation.html', (req, res) => sendHtml(res, 'donation.html'));
-app.get('/report.html', (req, res) => sendHtml(res, 'report.html'));
-app.get('/initiatives.html', (req, res) => sendHtml(res, 'initiatives.html'));
-app.get('/privacy-policy.html', (req, res) => sendHtml(res, 'privacy-policy.html'));
-app.get('/terms-of-service.html', (req, res) => sendHtml(res, 'terms-of-service.html'));
-app.get('/404.html', (req, res) => sendHtml(res, '404.html'));
+app.get('/home', (req, res) => sendHtml(res, 'index.html'));
+app.get('/about', (req, res) => sendHtml(res, 'about.html'));
+app.get('/contact', (req, res) => sendHtml(res, 'contact.html'));
+app.get('/donation', (req, res) => sendHtml(res, 'donation.html'));
+app.get('/report', (req, res) => sendHtml(res, 'report.html'));
+app.get('/initiatives', (req, res) => sendHtml(res, 'initiatives.html'));
+app.get('/privacy-policy', (req, res) => sendHtml(res, 'privacy-policy.html'));
+app.get('/terms-of-service', (req, res) => sendHtml(res, 'terms-of-service.html'));
+app.get('/404', (req, res) => sendHtml(res, '404.html'));
 app.get('/admin', (req, res) => sendHtml(res, 'admin.html'));
-app.get('/admin.html', (req, res) => sendHtml(res, 'admin.html'));
 
 const requireAdminKey = (req, res, next) => {
     const headerKey = req.get('x-admin-key');
