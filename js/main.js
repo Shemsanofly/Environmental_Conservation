@@ -273,6 +273,16 @@ function isValidEmail(email) {
 }
 
 /**
+ * Set current year in footer placeholders
+ */
+function setFooterYear() {
+    const currentYear = new Date().getFullYear();
+    document.querySelectorAll('[data-current-year]').forEach(element => {
+        element.textContent = currentYear;
+    });
+}
+
+/**
  * Initialize all functions when DOM is loaded
  */
 document.addEventListener('DOMContentLoaded', function () {
@@ -284,6 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initFormEffects();
     initHeaderScrollEffect();
     initReadMoreButtons();
+    setFooterYear();
 });
 
 /**

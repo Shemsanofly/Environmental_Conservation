@@ -518,6 +518,10 @@ app.post('/api/sponsors', async (req, res) => {
 
 app.post('/api/reports', async (req, res) => {
     const {
+        title,
+        imageDataUrl,
+        imageName,
+        imageMimeType,
         reporterName,
         reporterEmail,
         reporterPhone,
@@ -530,36 +534,78 @@ app.post('/api/reports', async (req, res) => {
         locationSource
     } = req.body || {};
 
+    const normalizedTitle = String(title || '').trim();
+    const normalizedImageDataUrl = String(imageDataUrl || '').trim();
+    const normalizedImageName = String(imageName || '').trim();
+    const normalizedImageMimeType = String(imageMimeType || '').trim().toLowerCase();
     const normalizedName = String(reporterName || '').trim();
     const normalizedEmail = String(reporterEmail || '').trim();
     const normalizedType = String(reportType || '').trim();
     const normalizedSeverity = String(severity || '').trim().toLowerCase();
     const normalizedDescription = String(description || '').trim();
+    const hasLegacyFields = Boolean(normalizedName || normalizedEmail || normalizedType);
 
-    if (!normalizedName || !normalizedEmail || !normalizedType || !normalizedDescription) {
+    if (!normalizedDescription) {
         return res.status(400).json({ error: 'Missing required report fields' });
     }
 
-    if (!normalizedEmail.includes('@')) {
-        return res.status(400).json({ error: 'Valid email is required' });
+    if (!hasLegacyFields) {
+        if (!normalizedTitle || normalizedTitle.length < 5) {
+            return res.status(400).json({ error: 'Title must be at least 5 characters' });
+        }
+
+        if (!normalizedImageDataUrl.startsWith('data:image/')) {
+            return res.status(400).json({ error: 'A valid image upload is required' });
+        }
+
+        const approximateImageBytes = Math.ceil((normalizedImageDataUrl.length * 3) / 4);
+        if (approximateImageBytes > 5 * 1024 * 1024) {
+            return res.status(400).json({ error: 'Image is too large. Maximum size is 5MB' });
+        }
     }
 
-    if (!['low', 'medium', 'high', 'critical'].includes(normalizedSeverity)) {
+    if (hasLegacyFields && !normalizedEmail.includes('@')) {
+        return res.status(400).json({ error: 'Valid email is required for legacy report format' });
+    }
+
+    if (hasLegacyFields && !normalizedName) {
+        return res.status(400).json({ error: 'Reporter name is required for legacy report format' });
+    }
+
+    const resolvedSeverity = normalizedSeverity || 'medium';
+    if (!['low', 'medium', 'high', 'critical'].includes(resolvedSeverity)) {
         return res.status(400).json({ error: 'Invalid severity level' });
+    }
+
+    const parsedLatitude = Number(latitude);
+    const parsedLongitude = Number(longitude);
+    const hasLatitude = Number.isFinite(parsedLatitude);
+    const hasLongitude = Number.isFinite(parsedLongitude);
+
+    if (!hasLatitude || parsedLatitude < -90 || parsedLatitude > 90) {
+        return res.status(400).json({ error: 'Latitude must be a valid number between -90 and 90' });
+    }
+
+    if (!hasLongitude || parsedLongitude < -180 || parsedLongitude > 180) {
+        return res.status(400).json({ error: 'Longitude must be a valid number between -180 and 180' });
     }
 
     try {
         await addIncidentReport({
-            reporterName: normalizedName,
-            reporterEmail: normalizedEmail,
+            reporterName: normalizedName || 'Anonymous Reporter',
+            reporterEmail: normalizedEmail || 'anonymous@local.invalid',
             reporterPhone: reporterPhone ? String(reporterPhone).trim() : '',
-            reportType: normalizedType,
-            severity: normalizedSeverity,
+            reportType: normalizedType || 'General Incident',
+            title: normalizedTitle,
+            severity: resolvedSeverity,
             description: normalizedDescription,
             locationLabel: locationLabel ? String(locationLabel).trim() : '',
-            latitude: Number.isFinite(Number(latitude)) ? Number(latitude) : null,
-            longitude: Number.isFinite(Number(longitude)) ? Number(longitude) : null,
+            latitude: parsedLatitude,
+            longitude: parsedLongitude,
             locationSource: locationSource ? String(locationSource).trim() : 'manual',
+            imageName: normalizedImageName,
+            imageMimeType: normalizedImageMimeType,
+            imageDataUrl: normalizedImageDataUrl,
             status: 'new',
             ip: req.ip,
             userAgent: req.get('user-agent') || ''

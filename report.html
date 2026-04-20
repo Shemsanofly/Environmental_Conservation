@@ -59,42 +59,22 @@
             <div id="reportStatus" class="report-status"></div>
             <form id="incidentReportForm">
                 <div class="report-grid">
-                    <div class="report-field">
-                        <label for="reporterName">Full Name *</label>
-                        <input id="reporterName" type="text" required minlength="3" placeholder="Your name">
+                    <div class="report-field" style="grid-column: 1 / -1;">
+                        <label for="reportTitle">Title *</label>
+                        <input id="reportTitle" type="text" required minlength="5" maxlength="120" placeholder="Short title of the incident">
+                    </div>
+                    <div class="report-field" style="grid-column: 1 / -1;">
+                        <label for="reportImage">Upload Image *</label>
+                        <input id="reportImage" type="file" accept="image/*" required>
+                        <small id="imagePreviewText">No image selected</small>
                     </div>
                     <div class="report-field">
-                        <label for="reporterEmail">Email *</label>
-                        <input id="reporterEmail" type="email" required placeholder="you@example.com">
+                        <label for="latitude">Latitude *</label>
+                        <input id="latitude" type="number" step="any" min="-90" max="90" required placeholder="-6.3690">
                     </div>
                     <div class="report-field">
-                        <label for="reporterPhone">Phone</label>
-                        <input id="reporterPhone" type="tel" placeholder="+255...">
-                    </div>
-                    <div class="report-field">
-                        <label for="reportType">Incident Type *</label>
-                        <select id="reportType" required>
-                            <option value="">Select type</option>
-                            <option value="Illegal logging">Illegal logging</option>
-                            <option value="Pollution">Pollution</option>
-                            <option value="Wildlife threat">Wildlife threat</option>
-                            <option value="Forest fire">Forest fire</option>
-                            <option value="Water contamination">Water contamination</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="report-field">
-                        <label for="severity">Severity *</label>
-                        <select id="severity" required>
-                            <option value="medium">Medium</option>
-                            <option value="low">Low</option>
-                            <option value="high">High</option>
-                            <option value="critical">Critical</option>
-                        </select>
-                    </div>
-                    <div class="report-field">
-                        <label for="locationLabel">Location Description</label>
-                        <input id="locationLabel" type="text" placeholder="Village, district, landmark...">
+                        <label for="longitude">Longitude *</label>
+                        <input id="longitude" type="number" step="any" min="-180" max="180" required placeholder="34.8888">
                     </div>
                 </div>
 

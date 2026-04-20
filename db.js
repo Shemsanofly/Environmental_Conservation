@@ -61,18 +61,24 @@ async function initDb() {
             reporter_email TEXT NOT NULL,
             reporter_phone TEXT,
             report_type TEXT NOT NULL,
+            title TEXT,
             severity TEXT NOT NULL,
             description TEXT NOT NULL,
             location_label TEXT,
             latitude REAL,
             longitude REAL,
             location_source TEXT,
+            image_name TEXT,
+            image_mime_type TEXT,
+            image_data_url TEXT,
             status TEXT NOT NULL,
             ip TEXT,
             user_agent TEXT,
             created_at TEXT NOT NULL
         );
     `);
+
+    await ensureIncidentReportsColumns(db);
 
     await db.exec(`
         CREATE TABLE IF NOT EXISTS payment_transactions (
@@ -93,6 +99,27 @@ async function initDb() {
             created_at TEXT NOT NULL
         );
     `);
+}
+
+async function ensureIncidentReportsColumns(db) {
+    const columns = await db.all('PRAGMA table_info(incident_reports)');
+    const columnNames = new Set((columns || []).map((column) => String(column.name || '').toLowerCase()));
+
+    if (!columnNames.has('title')) {
+        await db.exec('ALTER TABLE incident_reports ADD COLUMN title TEXT');
+    }
+
+    if (!columnNames.has('image_name')) {
+        await db.exec('ALTER TABLE incident_reports ADD COLUMN image_name TEXT');
+    }
+
+    if (!columnNames.has('image_mime_type')) {
+        await db.exec('ALTER TABLE incident_reports ADD COLUMN image_mime_type TEXT');
+    }
+
+    if (!columnNames.has('image_data_url')) {
+        await db.exec('ALTER TABLE incident_reports ADD COLUMN image_data_url TEXT');
+    }
 }
 
 async function addContactSubmission({ fullName, email, phone, subject, message, ip, userAgent }) {
@@ -133,12 +160,16 @@ async function addIncidentReport({
     reporterEmail,
     reporterPhone,
     reportType,
+    title,
     severity,
     description,
     locationLabel,
     latitude,
     longitude,
     locationSource,
+    imageName,
+    imageMimeType,
+    imageDataUrl,
     status,
     ip,
     userAgent
@@ -152,28 +183,36 @@ async function addIncidentReport({
             reporter_email,
             reporter_phone,
             report_type,
+            title,
             severity,
             description,
             location_label,
             latitude,
             longitude,
             location_source,
+            image_name,
+            image_mime_type,
+            image_data_url,
             status,
             ip,
             user_agent,
             created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         , [
             reporterName,
             reporterEmail,
             reporterPhone,
             reportType,
+            title,
             severity,
             description,
             locationLabel,
             latitude,
             longitude,
             locationSource,
+            imageName,
+            imageMimeType,
+            imageDataUrl,
             status,
             ip,
             userAgent,
@@ -282,12 +321,16 @@ async function listIncidentReports({ limit, offset }) {
             reporter_email as reporterEmail,
             reporter_phone as reporterPhone,
             report_type as reportType,
+            title,
             severity,
             description,
             location_label as locationLabel,
             latitude,
             longitude,
             location_source as locationSource,
+            image_name as imageName,
+            image_mime_type as imageMimeType,
+            image_data_url as imageDataUrl,
             status,
             ip,
             user_agent as userAgent,

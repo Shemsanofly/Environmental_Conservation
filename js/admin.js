@@ -5,6 +5,14 @@
 
 // Admin API Key (should be set from HTML or environment)
 let adminApiKey = null;
+const EMPTY_STATS = {
+    contacts: 0,
+    donations: 0,
+    sponsors: 0,
+    reports: 0,
+    revenue: 0,
+    recurring: 0
+};
 
 // ===================================
 // AUTHENTICATION
@@ -70,10 +78,11 @@ async function handleAdminLogin(event) {
     try {
         showMessage('Verifying credentials...');
         
-        const response = await fetch('/api/health', {
+        const response = await fetch('/api/admin/stats', {
             headers: {
                 'x-admin-key': key
-            }
+            },
+            cache: 'no-store'
         });
 
         if (!response.ok) {
@@ -98,7 +107,10 @@ async function handleAdminLogin(event) {
  */
 function handleAdminLogout() {
     clearAdminKey();
-    showMessage('Logged out successfully');
+    adminApiKey = null;
+    resetStatsDisplay();
+    clearAdminTables();
+    showMessage('Logged out successfully. You must login again to view data.');
     setTimeout(() => {
         showLoginForm();
     }, 800);
@@ -119,7 +131,8 @@ async function fetchAdminData(endpoint) {
         const response = await fetch(endpoint, {
             headers: {
                 'x-admin-key': key
-            }
+            },
+            cache: 'no-store'
         });
 
         if (!response.ok) {
@@ -137,41 +150,73 @@ async function fetchAdminData(endpoint) {
     }
 }
 
+function resetStatsDisplay() {
+    const statContacts = document.getElementById('statContacts');
+    const statDonations = document.getElementById('statDonations');
+    const statSponsors = document.getElementById('statSponsors');
+    const statReports = document.getElementById('statReports');
+    const statRevenue = document.getElementById('statRevenue');
+    const statRecurring = document.getElementById('statRecurring');
+
+    if (statContacts) statContacts.textContent = '0';
+    if (statDonations) statDonations.textContent = '0';
+    if (statSponsors) statSponsors.textContent = '0';
+    if (statReports) statReports.textContent = '0';
+    if (statRevenue) statRevenue.textContent = '$0.00';
+    if (statRecurring) statRecurring.textContent = '0';
+}
+
+function clearAdminTables() {
+    const tableIds = ['contactsTable', 'donationsTable', 'sponsorsTable', 'reportsTable', 'paymentsTable'];
+    tableIds.forEach((tableId) => {
+        const tableBody = document.getElementById(tableId);
+        if (tableBody) {
+            tableBody.innerHTML = '';
+        }
+    });
+}
+
+function normalizeRows(data) {
+    return data && Array.isArray(data.rows) ? data.rows : [];
+}
+
 /**
  * Load all dashboard data
  */
 async function loadDashboardData() {
     try {
         showMessage('Loading dashboard...');
-        
-        const stats = await fetchAdminData('/api/admin/stats');
-        const contacts = await fetchAdminData('/api/admin/contacts?limit=50&offset=0');
-        const donations = await fetchAdminData('/api/admin/donations?limit=50&offset=0');
-        const sponsors = await fetchAdminData('/api/admin/sponsors?limit=50&offset=0');
-        const reports = await fetchAdminData('/api/admin/reports?limit=50&offset=0');
-        const payments = await fetchAdminData('/api/admin/payments?limit=50&offset=0');
 
-        if (stats) {
-            displayStats(stats);
-        }
-        if (contacts && contacts.rows) {
-            displayContacts(contacts.rows);
-        }
-        if (donations && donations.rows) {
-            displayDonations(donations.rows);
-        }
-        if (sponsors && sponsors.rows) {
-            displaySponsors(sponsors.rows);
-        }
-        if (reports && reports.rows) {
-            displayReports(reports.rows);
-        }
-        if (payments && payments.rows) {
-            displayPayments(payments.rows);
-        }
+        // Prevent stale UI: clear existing values while fresh data loads.
+        resetStatsDisplay();
+        clearAdminTables();
+
+        const [stats, contactsResponse, donationsResponse, sponsorsResponse, reportsResponse, paymentsResponse] = await Promise.all([
+            fetchAdminData('/api/admin/stats'),
+            fetchAdminData('/api/admin/contacts?limit=50&offset=0'),
+            fetchAdminData('/api/admin/donations?limit=50&offset=0'),
+            fetchAdminData('/api/admin/sponsors?limit=50&offset=0'),
+            fetchAdminData('/api/admin/reports?limit=50&offset=0'),
+            fetchAdminData('/api/admin/payments?limit=50&offset=0')
+        ]);
+
+        const contacts = normalizeRows(contactsResponse);
+        const donations = normalizeRows(donationsResponse);
+        const sponsors = normalizeRows(sponsorsResponse);
+        const reports = normalizeRows(reportsResponse);
+        const payments = normalizeRows(paymentsResponse);
+
+        displayStats(stats || EMPTY_STATS);
+        displayContacts(contacts);
+        displayDonations(donations);
+        displaySponsors(sponsors);
+        displayReports(reports);
+        displayPayments(payments);
 
         showMessage('Dashboard loaded successfully');
     } catch (error) {
+        resetStatsDisplay();
+        clearAdminTables();
         showError(`Error loading dashboard: ${error.message}`);
     }
 }
@@ -227,16 +272,27 @@ function displayReports(reports) {
 
     reports.forEach(report => {
         const tr = document.createElement('tr');
-        const coordinates = Number.isFinite(Number(report.latitude)) && Number.isFinite(Number(report.longitude))
-            ? `${Number(report.latitude).toFixed(5)}, ${Number(report.longitude).toFixed(5)}`
-            : '';
-        const locationText = report.locationLabel || coordinates || '-';
+        const hasLatitude = Number.isFinite(Number(report.latitude));
+        const hasLongitude = Number.isFinite(Number(report.longitude));
+        const latitude = Number(report.latitude);
+        const longitude = Number(report.longitude);
+        const coordinates = hasLatitude && hasLongitude
+            ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+            : '-';
+        const imageHtml = report.imageDataUrl
+            ? `<a href="${escapeHtml(report.imageDataUrl)}" target="_blank" rel="noopener"><img src="${escapeHtml(report.imageDataUrl)}" alt="Report evidence" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid #d9dee5;"></a>`
+            : '-';
+        const mapHtml = hasLatitude && hasLongitude
+            ? `<a href="https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}&zoom=16#map=16/${latitude}/${longitude}\" target="_blank" rel="noopener" title="Exact location reported by user: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}" style="display:inline-block;background:#00a86b;color:#fff;padding:8px 12px;border-radius:6px;text-decoration:none;font-weight:600;font-size:13px;white-space:nowrap;">📍 User Location</a>`
+            : '-';
         tr.innerHTML = `
             <td>${formatDate(report.createdAt)}</td>
-            <td>${escapeHtml(report.reportType || '')}</td>
-            <td>${escapeHtml((report.severity || '').toUpperCase())}</td>
-            <td>${escapeHtml(report.reporterName || '')}</td>
-            <td>${escapeHtml(locationText)}</td>
+            <td>${escapeHtml(report.title || report.reportType || '-')}</td>
+            <td title="${escapeHtml(report.description || '')}">${truncateText(report.description || '', 120)}</td>
+            <td>${imageHtml}</td>
+            <td>${escapeHtml(coordinates)}</td>
+            <td>${escapeHtml(report.locationSource || '-')}</td>
+            <td>${mapHtml}</td>
             <td>${escapeHtml(report.status || 'new')}</td>
         `;
         container.appendChild(tr);
@@ -451,14 +507,10 @@ function showError(error) {
 function initAdminPanel() {
     clearError();
 
-    // Check if user is already logged in
-    adminApiKey = getAdminKey();
-    
-    if (adminApiKey) {
-        showDashboard();
-    } else {
-        showLoginForm();
-    }
+    // Always show login form on page load - require fresh authentication
+    // Do NOT use localStorage to auto-login; admin must enter password each session
+    clearAdminKey();
+    showLoginForm();
 
     // Add event listeners
     const loginForm = document.getElementById('loginForm');
@@ -477,24 +529,38 @@ function initAdminPanel() {
 
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleAdminLogout);
+        logoutBtn.addEventListener('click', (event) => {
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
+            handleAdminLogout();
+        });
     }
+
+    // Clear admin key when page is about to unload (user closes tab/window)
+    window.addEventListener('beforeunload', () => {
+        clearAdminKey();
+    });
 
     const refreshBtn = document.getElementById('refreshBtn') || document.getElementById('loadDataBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', (event) => {
             const keyInput = document.getElementById('adminKeyInput') || document.getElementById('adminKey');
-            if (keyInput && keyInput.value.trim()) {
-                setAdminKey(keyInput.value.trim());
-                keyInput.value = '';
-                showDashboard();
+            if (!keyInput) {
+                showError('Admin key input not found.');
                 return;
             }
 
-            if (!getAdminKey()) {
-                showError('Please enter your admin key first.');
+            const key = keyInput.value.trim();
+            if (!key) {
+                showError('Please enter your admin key.');
                 return;
             }
+
+            setAdminKey(key);
+            keyInput.value = '';
+            showDashboard();
+            return;
 
             if (event && typeof event.preventDefault === 'function') {
                 event.preventDefault();
