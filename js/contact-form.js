@@ -220,39 +220,11 @@ function initFormValidation() {
 // FORM SUBMISSION
 // ===================================
 
-const API_BASE_URL = typeof window !== 'undefined' && window.API_BASE_URL
-    ? window.API_BASE_URL.replace(/\/$/, '')
-    : '';
-
-function getApiUrl(path) {
-    if (!API_BASE_URL) return path;
-    const normalized = path.startsWith('/') ? path : `/${path}`;
-    return `${API_BASE_URL}${normalized}`;
-}
-
-function storeFallbackSubmission(storageKey, payload) {
-    try {
-        const existing = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        existing.push({ ...payload, savedAt: new Date().toISOString() });
-        localStorage.setItem(storageKey, JSON.stringify(existing));
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-function isNetworkOrNotFoundError(error) {
-    const message = String(error && error.message ? error.message : '').toLowerCase();
-    return message.includes('failed to fetch') || message.includes('network') || message.includes('not configured');
-}
-
 /**
  * Handle form submission with validation
  * @param {Event} event - The form submit event
  */
 function handleFormSubmit(event) {
-    event.preventDefault();
-
     // Get form values
     const fullName = document.getElementById('fullName').value;
     const email = document.getElementById('email').value;
@@ -303,79 +275,21 @@ function handleFormSubmit(event) {
         isValid = false;
     }
 
-    // If validation passed
-    if (isValid) {
-        // Create form data object
-        const formData = {
-            fullName: fullName.trim(),
-            email: email.trim(),
-            phone: phone.trim(),
-            subject: subject.trim(),
-            message: message.trim(),
-            timestamp: new Date().toISOString()
-        };
-
-        // Submit to backend
-        submitFormData(formData);
+    if (!isValid) {
+        event.preventDefault();
+        return;
     }
-}
 
-/**
- * Process form submission
- * @param {Object} formData - The form data to submit
- */
-async function submitFormData(formData) {
-    // Disable submit button
+    // Set email subject for FormSubmit and prevent double-click while browser submits.
+    const hiddenSubjectInput = document.getElementById('formSubmitSubject');
+    if (hiddenSubjectInput) {
+        hiddenSubjectInput.value = `Contact Inquiry: ${subject.trim()}`;
+    }
+
     const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending...';
-
-    try {
-        const response = await fetch(getApiUrl('/api/contact'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-
-        if (!response.ok) {
-            let serverMessage = 'Unable to send message. Please try again.';
-            if (response.status === 404) {
-                serverMessage = 'Contact service is not configured.';
-            } else {
-                try {
-                    const payload = await response.json();
-                    if (payload && payload.error) {
-                        serverMessage = payload.error;
-                    }
-                } catch (error) {
-                    // Ignore JSON parse errors
-                }
-            }
-
-            throw new Error(serverMessage);
-        }
-
-        showSuccess('Thank you for your message! We will contact you soon at ' + formData.email);
-
-        // Reset form
-        document.getElementById('contactForm').reset();
-        document.getElementById('charCount').textContent = '0';
-    } catch (error) {
-        if (isNetworkOrNotFoundError(error)) {
-            const saved = storeFallbackSubmission('geci_contact_fallback', formData);
-            if (saved) {
-                showSuccess('Thank you! We could not reach the server, but your message was saved on this device. You can also email us at aminshemsa@gmail.com.');
-                document.getElementById('contactForm').reset();
-                document.getElementById('charCount').textContent = '0';
-                return;
-            }
-        }
-
-        showError('messageError', error.message || 'Unable to send message.');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
     }
 }
 

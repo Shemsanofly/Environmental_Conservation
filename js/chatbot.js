@@ -426,6 +426,19 @@ const ENVIRONMENTAL_QA_PAIRS = [
 const DEFAULT_RESPONSE =
     'I could not find a close match for that question yet. Please try asking about who I am, what I do, what environment means, pollution, climate change, recycling, deforestation, wildlife protection, or sustainable living. For example: "What is environment?"';
 
+const WEBSITE_INFO = {
+    organization: 'Global Environmental Conservation Initiative (GECI)',
+    summary: 'A community-driven environmental organization focused on conservation, sustainable practices, awareness, and protecting natural resources for future generations.',
+    mission: 'To raise awareness, implement sustainable practices, and protect natural resources for future generations.',
+    location: 'Environmental Conservation Center, Tanzania',
+    email: 'aminshemsa@gmail.com',
+    hours: 'Mon–Fri: 9:00 AM–5:00 PM',
+    phones: [
+        '+255 621 214 785',
+        '+255 776 219 438'
+    ]
+};
+
 class EnvironmentalChatbot {
     constructor() {
         this.isOpen = false;
@@ -438,7 +451,7 @@ class EnvironmentalChatbot {
     init() {
         this.createWidgetHTML();
         this.attachEventListeners();
-        this.addBotMessage('Hello. I am your Environmental Conservation Assistant. Ask me any question about pollution, climate change, recycling, deforestation, wildlife, or sustainable living.');
+        this.addBotMessage('Hello. I am your Environmental Conservation Assistant. Ask me about pollution, climate change, recycling, deforestation, wildlife, sustainable living, or website contact details.');
     }
 
     createWidgetHTML() {
@@ -521,6 +534,16 @@ class EnvironmentalChatbot {
         const normalizedInput = this.normalizeText(userInput);
         if (!normalizedInput) return DEFAULT_RESPONSE;
 
+        const greetingAnswer = this.getGreetingAnswer(normalizedInput);
+        if (greetingAnswer) {
+            return greetingAnswer;
+        }
+
+        const websiteAnswer = this.getWebsiteAnswer(normalizedInput);
+        if (websiteAnswer) {
+            return websiteAnswer;
+        }
+
         let bestMatch = null;
         let highestScore = 0;
 
@@ -537,6 +560,51 @@ class EnvironmentalChatbot {
         }
 
         return bestMatch.answer;
+    }
+
+    getGreetingAnswer(normalizedInput) {
+        const greetings = ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'];
+        if (!this.matchesAny(normalizedInput, greetings)) {
+            return null;
+        }
+
+        return 'Hello. I am here to help with environmental conservation and website information like contact numbers, email, location, and about us.';
+    }
+
+    getWebsiteAnswer(normalizedInput) {
+        const wantsPhone = this.matchesAny(normalizedInput, ['phone', 'number', 'contact number', 'call', 'mobile']);
+        const wantsContact = this.matchesAny(normalizedInput, ['contact', 'reach you', 'get in touch', 'contact us']);
+        const wantsEmail = this.matchesAny(normalizedInput, ['email', 'mail']);
+        const wantsLocation = this.matchesAny(normalizedInput, ['location', 'office', 'address', 'where are you', 'where can i find you']);
+        const wantsAbout = this.matchesAny(normalizedInput, ['about', 'about us', 'company', 'organization', 'website summary', 'summarize website', 'mission', 'vision', 'what is geci']);
+        const wantsHours = this.matchesAny(normalizedInput, ['hours', 'open', 'opening time', 'working time']);
+
+        if (wantsPhone || wantsContact) {
+            return `You can contact ${WEBSITE_INFO.organization} on ${WEBSITE_INFO.phones[0]} or ${WEBSITE_INFO.phones[1]}.`;
+        }
+
+        if (wantsEmail) {
+            return `Our email is ${WEBSITE_INFO.email}.`;
+        }
+
+        if (wantsLocation) {
+            return `We are located at ${WEBSITE_INFO.location}.`;
+        }
+
+        if (wantsHours) {
+            return `Our operating hours are ${WEBSITE_INFO.hours}.`;
+        }
+
+        if (wantsAbout) {
+            return `${WEBSITE_INFO.organization}: ${WEBSITE_INFO.summary} Mission: ${WEBSITE_INFO.mission} You can also visit the About Us page for team details and initiatives.`;
+        }
+
+        return null;
+    }
+
+    matchesAny(text, phrases) {
+        const input = String(text || '');
+        return phrases.some((phrase) => input.includes(this.normalizeText(phrase)));
     }
 
     calculateSimilarityScore(normalizedInput, qa) {
