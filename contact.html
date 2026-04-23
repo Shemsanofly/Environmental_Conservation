@@ -52,9 +52,7 @@
                 <!-- Contact Form -->
                 <div class="contact-form-container fade-in">
                     <h3>Send us a Message</h3>
-                    <form id="contactForm" class="contact-form" action="https://formsubmit.co/aminshemsa@gmail.com" method="POST" onsubmit="handleFormSubmit(event)">
-                        <input type="hidden" name="_captcha" value="false">
-                        <input type="hidden" name="_subject" id="formSubmitSubject" value="New contact message from GECI website">
+                    <form id="contactForm" class="contact-form" action="/api/contact" method="POST" onsubmit="handleFormSubmit(event)">
                         <div class="form-group">
                             <label for="fullName">Full Name *</label>
                             <input 
@@ -131,6 +129,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary" id="submitBtn">Send Message</button>
+                        <div class="error-message" id="submitError"></div>
                         <div class="success-message" id="successMessage"></div>
                     </form>
                 </div>

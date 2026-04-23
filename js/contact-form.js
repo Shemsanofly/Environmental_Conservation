@@ -103,6 +103,23 @@ function showSuccess(message) {
     }
 }
 
+function getContactApiUrl() {
+    const baseUrl = String(window.API_BASE_URL || '').trim().replace(/\/$/, '');
+    return `${baseUrl || ''}/api/contact`;
+}
+
+function resetContactForm() {
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.reset();
+    }
+
+    const charCount = document.getElementById('charCount');
+    if (charCount) {
+        charCount.textContent = '0';
+    }
+}
+
 // ===================================
 // FORM FIELD LISTENERS
 // ===================================
@@ -224,7 +241,9 @@ function initFormValidation() {
  * Handle form submission with validation
  * @param {Event} event - The form submit event
  */
-function handleFormSubmit(event) {
+async function handleFormSubmit(event) {
+    event.preventDefault();
+
     // Get form values
     const fullName = document.getElementById('fullName').value;
     const email = document.getElementById('email').value;
@@ -240,6 +259,7 @@ function handleFormSubmit(event) {
     clearError('subjectError');
     clearError('messageError');
     clearError('agreeError');
+    clearError('submitError');
 
     // Validation flags
     let isValid = true;
@@ -276,20 +296,46 @@ function handleFormSubmit(event) {
     }
 
     if (!isValid) {
-        event.preventDefault();
         return;
-    }
-
-    // Set email subject for FormSubmit and prevent double-click while browser submits.
-    const hiddenSubjectInput = document.getElementById('formSubmitSubject');
-    if (hiddenSubjectInput) {
-        hiddenSubjectInput.value = `Contact Inquiry: ${subject.trim()}`;
     }
 
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending...';
+    }
+
+    try {
+        const response = await fetch(getContactApiUrl(), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fullName,
+                email,
+                phone,
+                subject,
+                message
+            })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(payload.error || 'Unable to send your message right now');
+        }
+
+        clearError('submitError');
+        showSuccess('Your message was sent successfully. We will reply by email as soon as possible.');
+        resetContactForm();
+    } catch (error) {
+        showError('submitError', error.message || 'Unable to send your message right now');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Message';
+        }
     }
 }
 

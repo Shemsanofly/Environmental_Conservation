@@ -99,6 +99,18 @@ Add payment keys for Flutterwave in `.env`:
 FLW_SECRET_KEY=your_flutterwave_secret_key
 ```
 
+To send contact form messages to `aminshemsa@gmail.com`, configure SMTP in `.env` with a Gmail App Password or another SMTP provider:
+
+```env
+CONTACT_RECIPIENT_EMAIL=aminshemsa@gmail.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=aminshemsa@gmail.com
+SMTP_PASS=your_gmail_app_password_here
+SMTP_FROM_EMAIL=aminshemsa@gmail.com
+```
+
 ### Admin Dashboard
 
 Open `/admin` in the browser and enter your admin key to view user data.
@@ -166,7 +178,7 @@ python -m http.server 8000
 
 ## Contact Form Backend
 
-The contact form now submits to the Node backend and stores data in SQLite. You can access messages from the admin dashboard at `/admin`.
+The contact form submits to the Node backend, stores data in SQLite, and emails each submission to `aminshemsa@gmail.com` when SMTP credentials are configured. You can also view saved messages from the admin dashboard at `/admin`.
 
 ## Maintenance
 

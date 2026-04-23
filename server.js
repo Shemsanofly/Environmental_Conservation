@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const https = require('https');
 const crypto = require('crypto');
+const tls = require('tls');
 const {
     initDb,
     addContactSubmission,
@@ -30,6 +31,13 @@ const PAYMENT_MODE = String(process.env.PAYMENT_MODE || 'live').trim().toLowerCa
 const IS_DEMO_MODE = PAYMENT_MODE === 'demo';
 const OPENAI_API_KEY = String(process.env.OPENAI_API_KEY || '').trim();
 const GIPHY_API_KEY = String(process.env.GIPHY_API_KEY || 'dc6zaTOxFJmzC').trim();
+const CONTACT_RECIPIENT_EMAIL = String(process.env.CONTACT_RECIPIENT_EMAIL || 'aminshemsa@gmail.com').trim();
+const SMTP_HOST = String(process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+const SMTP_SECURE = String(process.env.SMTP_SECURE || 'true').toLowerCase() !== 'false';
+const SMTP_USER = String(process.env.SMTP_USER || '').trim();
+const SMTP_PASS = String(process.env.SMTP_PASS || '').trim();
+const SMTP_FROM_EMAIL = String(process.env.SMTP_FROM_EMAIL || SMTP_USER || CONTACT_RECIPIENT_EMAIL).trim();
 
 function postJson(url, payload, headers = {}) {
     return new Promise((resolve, reject) => {
@@ -182,6 +190,124 @@ function createTxRef() {
         return `geci-${crypto.randomUUID()}`;
     }
     return `geci-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
+}
+
+function sanitizeHeaderValue(value) {
+    return String(value || '').replace(/[\r\n]+/g, ' ').trim();
+}
+
+function dotStuffBody(value) {
+    return String(value || '').replace(/^\./gm, '..');
+}
+
+function readSmtpResponse(socket) {
+    return new Promise((resolve, reject) => {
+        let buffer = '';
+
+        const onData = (chunk) => {
+            buffer += chunk.toString('utf8');
+            const lines = buffer.split(/\r?\n/).filter((line) => line.length > 0);
+
+            if (!lines.length) {
+                return;
+            }
+
+            const lastLine = lines[lines.length - 1];
+            const match = lastLine.match(/^(\d{3})([ -])(.*)$/);
+
+            if (!match || match[2] === '-') {
+                return;
+            }
+
+            socket.off('data', onData);
+            socket.off('error', onError);
+            resolve({
+                code: Number(match[1]),
+                message: lines.join('\n')
+            });
+        };
+
+        const onError = (error) => {
+            socket.off('data', onData);
+            socket.off('error', onError);
+            reject(error);
+        };
+
+        socket.on('data', onData);
+        socket.on('error', onError);
+    });
+}
+
+async function sendSmtpCommand(socket, command, expectedCodes) {
+    socket.write(`${command}\r\n`);
+    const response = await readSmtpResponse(socket);
+
+    if (!expectedCodes.includes(response.code)) {
+        throw new Error(`SMTP command failed (${response.code}): ${response.message}`);
+    }
+
+    return response;
+}
+
+async function sendContactNotificationEmail({ fullName, email, phone, subject, message }) {
+    if (!SMTP_USER || !SMTP_PASS) {
+        throw new Error('SMTP email settings are not configured');
+    }
+
+    const socket = tls.connect({
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        servername: SMTP_HOST,
+        rejectUnauthorized: SMTP_SECURE
+    });
+
+    try {
+        const greeting = await readSmtpResponse(socket);
+        if (greeting.code !== 220) {
+            throw new Error(`SMTP server rejected connection (${greeting.code}): ${greeting.message}`);
+        }
+
+        await sendSmtpCommand(socket, `EHLO ${SMTP_HOST}`, [250]);
+        await sendSmtpCommand(socket, 'AUTH LOGIN', [334]);
+        await sendSmtpCommand(socket, Buffer.from(SMTP_USER, 'utf8').toString('base64'), [334]);
+        await sendSmtpCommand(socket, Buffer.from(SMTP_PASS, 'utf8').toString('base64'), [235]);
+        await sendSmtpCommand(socket, `MAIL FROM:<${SMTP_FROM_EMAIL}>`, [250]);
+        await sendSmtpCommand(socket, `RCPT TO:<${CONTACT_RECIPIENT_EMAIL}>`, [250, 251]);
+        await sendSmtpCommand(socket, 'DATA', [354]);
+
+        const emailLines = [
+            `From: GECI Contact Form <${sanitizeHeaderValue(SMTP_FROM_EMAIL)}>`,
+            `To: ${sanitizeHeaderValue(CONTACT_RECIPIENT_EMAIL)}`,
+            `Subject: ${sanitizeHeaderValue(`New contact message: ${subject}`)}`,
+            `Reply-To: ${sanitizeHeaderValue(fullName)} <${sanitizeHeaderValue(email)}>`,
+            'MIME-Version: 1.0',
+            'Content-Type: text/plain; charset=UTF-8',
+            '',
+            'A new contact message was submitted through the GECI website.',
+            '',
+            `Name: ${fullName}`,
+            `Email: ${email}`,
+            `Phone: ${phone || 'Not provided'}`,
+            `Subject: ${subject}`,
+            '',
+            'Message:',
+            message,
+            '',
+            `Submitted at: ${new Date().toISOString()}`
+        ];
+
+        const emailMessage = `${dotStuffBody(emailLines.join('\r\n'))}\r\n.\r\n`;
+        socket.write(emailMessage);
+
+        const sent = await readSmtpResponse(socket);
+        if (sent.code !== 250) {
+            throw new Error(`SMTP message rejected (${sent.code}): ${sent.message}`);
+        }
+
+        await sendSmtpCommand(socket, 'QUIT', [221]);
+    } finally {
+        socket.end();
+    }
 }
 
 app.use(helmet({
@@ -468,9 +594,13 @@ app.post('/api/contact', async (req, res) => {
             ip: req.ip,
             userAgent: req.get('user-agent') || ''
         });
-        return res.json({ ok: true });
+
+        await sendContactNotificationEmail(trimmed);
+
+        return res.json({ ok: true, emailedTo: CONTACT_RECIPIENT_EMAIL });
     } catch (error) {
-        return res.status(500).json({ error: 'Failed to save submission' });
+        console.error('Contact submission error:', error.message);
+        return res.status(500).json({ error: 'Failed to save submission and send email' });
     }
 });
 
