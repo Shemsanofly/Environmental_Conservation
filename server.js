@@ -594,12 +594,10 @@ app.post('/api/contact', async (req, res) => {
             userAgent: req.get('user-agent') || ''
         });
 
-        await sendContactNotificationEmail(trimmed);
-
-        return res.json({ ok: true, emailedTo: CONTACT_RECIPIENT_EMAIL });
+        return res.json({ ok: true });
     } catch (error) {
         console.error('Contact submission error:', error.message);
-        return res.status(500).json({ error: 'Failed to save submission and send email' });
+        return res.status(500).json({ error: 'Failed to save submission' });
     }
 });
 

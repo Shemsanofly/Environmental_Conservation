@@ -327,7 +327,7 @@ async function handleFormSubmit(event) {
         }
 
         clearError('submitError');
-        showSuccess('Your message was sent successfully. We will reply by email as soon as possible.');
+        showSuccess('Your message was submitted successfully.');
         resetContactForm();
     } catch (error) {
         showError('submitError', error.message || 'Unable to send your message right now');
