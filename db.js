@@ -1,8 +1,15 @@
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
+let sqlite3 = null;
+let open = null;
+
+try {
+    sqlite3 = require('sqlite3');
+    ({ open } = require('sqlite'));
+} catch (error) {
+    console.warn('SQLite modules are unavailable; using in-memory data store.');
+}
 
 function resolveConfiguredDbPath() {
     const configured = String(process.env.DB_PATH || '').trim();
@@ -41,6 +48,10 @@ const dbCandidates = [
 ];
 
 async function openDatabase() {
+    if (!sqlite3 || !open) {
+        return null;
+    }
+
     let lastError = null;
 
     for (const candidatePath of dbCandidates) {
@@ -60,8 +71,46 @@ async function openDatabase() {
 
 const dbPromise = openDatabase();
 
+const memoryStore = {
+    contactSubmissions: [],
+    donationIntents: [],
+    sponsorIntents: [],
+    incidentReports: [],
+    paymentTransactions: [],
+    ids: {
+        contact: 1,
+        donation: 1,
+        sponsor: 1,
+        report: 1,
+        payment: 1
+    }
+};
+
+let memoryFallbackWarned = false;
+
+async function getDb() {
+    try {
+        const db = await dbPromise;
+        if (db) {
+            return db;
+        }
+    } catch (error) {
+        // Fallback to memory store below.
+    }
+
+    if (!memoryFallbackWarned) {
+        console.warn('Falling back to in-memory data store; data will reset on restart.');
+        memoryFallbackWarned = true;
+    }
+
+    return null;
+}
+
 async function initDb() {
-    const db = await dbPromise;
+    const db = await getDb();
+    if (!db) {
+        return;
+    }
 
     await db.exec(`
         CREATE TABLE IF NOT EXISTS contact_submissions (
@@ -168,8 +217,23 @@ async function ensureIncidentReportsColumns(db) {
 }
 
 async function addContactSubmission({ fullName, email, phone, subject, message, ip, userAgent }) {
-    const db = await dbPromise;
+    const db = await getDb();
     const createdAt = new Date().toISOString();
+
+    if (!db) {
+        memoryStore.contactSubmissions.push({
+            id: memoryStore.ids.contact++,
+            fullName,
+            email,
+            phone,
+            subject,
+            message,
+            ip,
+            userAgent,
+            createdAt
+        });
+        return;
+    }
 
     await db.run(
         `INSERT INTO contact_submissions (full_name, email, phone, subject, message, ip, user_agent, created_at)
@@ -179,8 +243,20 @@ async function addContactSubmission({ fullName, email, phone, subject, message, 
 }
 
 async function addDonationIntent({ amount, donationType, ip, userAgent }) {
-    const db = await dbPromise;
+    const db = await getDb();
     const createdAt = new Date().toISOString();
+
+    if (!db) {
+        memoryStore.donationIntents.push({
+            id: memoryStore.ids.donation++,
+            amount,
+            donationType,
+            ip,
+            userAgent,
+            createdAt
+        });
+        return;
+    }
 
     await db.run(
         `INSERT INTO donation_intents (amount, donation_type, ip, user_agent, created_at)
@@ -190,8 +266,20 @@ async function addDonationIntent({ amount, donationType, ip, userAgent }) {
 }
 
 async function addSponsorIntent({ sponsorType, amount, ip, userAgent }) {
-    const db = await dbPromise;
+    const db = await getDb();
     const createdAt = new Date().toISOString();
+
+    if (!db) {
+        memoryStore.sponsorIntents.push({
+            id: memoryStore.ids.sponsor++,
+            sponsorType,
+            amount,
+            ip,
+            userAgent,
+            createdAt
+        });
+        return;
+    }
 
     await db.run(
         `INSERT INTO sponsor_intents (sponsor_type, amount, ip, user_agent, created_at)
@@ -219,8 +307,33 @@ async function addIncidentReport({
     ip,
     userAgent
 }) {
-    const db = await dbPromise;
+    const db = await getDb();
     const createdAt = new Date().toISOString();
+
+    if (!db) {
+        memoryStore.incidentReports.push({
+            id: memoryStore.ids.report++,
+            reporterName,
+            reporterEmail,
+            reporterPhone,
+            reportType,
+            title,
+            severity,
+            description,
+            locationLabel,
+            latitude,
+            longitude,
+            locationSource,
+            imageName,
+            imageMimeType,
+            imageDataUrl,
+            status,
+            ip,
+            userAgent,
+            createdAt
+        });
+        return;
+    }
 
     await db.run(
         `INSERT INTO incident_reports (
@@ -281,8 +394,29 @@ async function addPaymentTransaction({
     ip,
     userAgent
 }) {
-    const db = await dbPromise;
+    const db = await getDb();
     const createdAt = new Date().toISOString();
+
+    if (!db) {
+        memoryStore.paymentTransactions.push({
+            id: memoryStore.ids.payment++,
+            txRef,
+            donorName,
+            donorEmail,
+            donorPhone,
+            amount,
+            currency,
+            paymentMethod,
+            donationType,
+            isRecurring: isRecurring ? 1 : 0,
+            provider,
+            status,
+            ip,
+            userAgent,
+            createdAt
+        });
+        return;
+    }
 
     await db.run(
         `INSERT INTO payment_transactions (
@@ -321,7 +455,13 @@ async function addPaymentTransaction({
 }
 
 async function listContacts({ limit, offset }) {
-    const db = await dbPromise;
+    const db = await getDb();
+    if (!db) {
+        return memoryStore.contactSubmissions
+            .slice()
+            .sort((a, b) => b.id - a.id)
+            .slice(offset, offset + limit);
+    }
 
     return db.all(
         `SELECT id, full_name as fullName, email, phone, subject, message, ip, user_agent as userAgent, created_at as createdAt
@@ -333,7 +473,13 @@ async function listContacts({ limit, offset }) {
 }
 
 async function listDonations({ limit, offset }) {
-    const db = await dbPromise;
+    const db = await getDb();
+    if (!db) {
+        return memoryStore.donationIntents
+            .slice()
+            .sort((a, b) => b.id - a.id)
+            .slice(offset, offset + limit);
+    }
 
     return db.all(
         `SELECT id, amount, donation_type as donationType, ip, user_agent as userAgent, created_at as createdAt
@@ -345,7 +491,13 @@ async function listDonations({ limit, offset }) {
 }
 
 async function listSponsors({ limit, offset }) {
-    const db = await dbPromise;
+    const db = await getDb();
+    if (!db) {
+        return memoryStore.sponsorIntents
+            .slice()
+            .sort((a, b) => b.id - a.id)
+            .slice(offset, offset + limit);
+    }
 
     return db.all(
         `SELECT id, sponsor_type as sponsorType, amount, ip, user_agent as userAgent, created_at as createdAt
@@ -357,7 +509,13 @@ async function listSponsors({ limit, offset }) {
 }
 
 async function listIncidentReports({ limit, offset }) {
-    const db = await dbPromise;
+    const db = await getDb();
+    if (!db) {
+        return memoryStore.incidentReports
+            .slice()
+            .sort((a, b) => b.id - a.id)
+            .slice(offset, offset + limit);
+    }
 
     return db.all(
         `SELECT
@@ -388,7 +546,13 @@ async function listIncidentReports({ limit, offset }) {
 }
 
 async function listPaymentTransactions({ limit, offset }) {
-    const db = await dbPromise;
+    const db = await getDb();
+    if (!db) {
+        return memoryStore.paymentTransactions
+            .slice()
+            .sort((a, b) => b.id - a.id)
+            .slice(offset, offset + limit);
+    }
 
     return db.all(
         `SELECT
@@ -415,7 +579,21 @@ async function listPaymentTransactions({ limit, offset }) {
 }
 
 async function getStats() {
-    const db = await dbPromise;
+    const db = await getDb();
+    if (!db) {
+        const revenue = memoryStore.paymentTransactions
+            .filter((payment) => ['completed', 'demo_success'].includes(String(payment.status || '')))
+            .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+
+        return {
+            contacts: memoryStore.contactSubmissions.length,
+            donations: memoryStore.donationIntents.length,
+            sponsors: memoryStore.sponsorIntents.length,
+            reports: memoryStore.incidentReports.length,
+            recurring: memoryStore.paymentTransactions.filter((payment) => Number(payment.isRecurring) === 1).length,
+            revenue
+        };
+    }
 
     const contactCount = await db.get('SELECT COUNT(*) as count FROM contact_submissions');
     const donationCount = await db.get('SELECT COUNT(*) as count FROM donation_intents');
