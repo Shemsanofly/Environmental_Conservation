@@ -1,13 +1,35 @@
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
 
-const dataDir = path.join(__dirname, 'data');
-const dbPath = path.join(dataDir, 'geci.db');
+function resolveConfiguredDbPath() {
+    const configured = String(process.env.DB_PATH || '').trim();
+    if (!configured) {
+        return path.join(__dirname, 'data', 'geci.db');
+    }
 
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+    return path.isAbsolute(configured)
+        ? configured
+        : path.join(__dirname, configured);
+}
+
+function ensureDbDirectory(filePath) {
+    const dirPath = path.dirname(filePath);
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+}
+
+let dbPath = resolveConfiguredDbPath();
+
+try {
+    ensureDbDirectory(dbPath);
+} catch (error) {
+    dbPath = path.join(os.tmpdir(), 'geci.db');
+    ensureDbDirectory(dbPath);
+    console.warn(`DB directory is not writable at configured path; using fallback: ${dbPath}`);
 }
 
 const dbPromise = open({
