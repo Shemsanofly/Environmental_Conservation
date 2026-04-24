@@ -33,13 +33,32 @@ try {
 } catch (error) {
     dbPath = path.join(os.tmpdir(), 'geci.db');
     ensureDbDirectory(dbPath);
-    console.warn(`DB directory is not writable at configured path; using fallback: ${dbPath}`);
 }
 
-const dbPromise = open({
-    filename: dbPath,
-    driver: sqlite3.Database
-});
+const dbCandidates = [
+    dbPath,
+    path.join(os.tmpdir(), 'geci.db')
+];
+
+async function openDatabase() {
+    let lastError = null;
+
+    for (const candidatePath of dbCandidates) {
+        try {
+            ensureDbDirectory(candidatePath);
+            return await open({
+                filename: candidatePath,
+                driver: sqlite3.Database
+            });
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    throw lastError || new Error('Unable to open SQLite database');
+}
+
+const dbPromise = openDatabase();
 
 async function initDb() {
     const db = await dbPromise;
