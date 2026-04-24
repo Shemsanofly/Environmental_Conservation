@@ -7,6 +7,10 @@ const { open } = require('sqlite');
 function resolveConfiguredDbPath() {
     const configured = String(process.env.DB_PATH || '').trim();
     if (!configured) {
+        if (String(process.env.RENDER || '').trim().toLowerCase() === 'true') {
+            return path.join(os.tmpdir(), 'geci.db');
+        }
+
         return path.join(__dirname, 'data', 'geci.db');
     }
 

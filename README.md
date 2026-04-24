@@ -99,7 +99,7 @@ Add payment keys for Flutterwave in `.env`:
 FLW_SECRET_KEY=your_flutterwave_secret_key
 ```
 
-For Render deployment, set a writable SQLite path in environment variables:
+For Render deployment, the app will automatically use a writable SQLite path under `/tmp` when `RENDER=true`. You can still set `DB_PATH` explicitly if you want a different location:
 
 ```env
 DB_PATH=/tmp/geci.db
