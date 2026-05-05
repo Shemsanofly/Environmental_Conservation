@@ -5,6 +5,7 @@
 
 // Admin API Key (should be set from HTML or environment)
 let adminApiKey = null;
+const API_BASE_URL = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
 const EMPTY_STATS = {
     contacts: 0,
     donations: 0,
@@ -36,23 +37,23 @@ function clearAdminKey() {
     adminApiKey = null;
 }
 
+function getApiUrl(path) {
+    return `${API_BASE_URL}${path}`;
+}
+
 function showLoginForm() {
-    const loginContainer = document.getElementById('loginContainer');
-    const dashboardContainer = document.getElementById('dashboardContainer');
+    const loginContainer = document.querySelector('.admin-login');
     const adminDashboard = document.getElementById('adminDashboard');
     
     if (loginContainer) loginContainer.style.display = 'block';
-    if (dashboardContainer) dashboardContainer.style.display = 'none';
     if (adminDashboard) adminDashboard.classList.add('hidden');
 }
 
 function showDashboard() {
-    const loginContainer = document.getElementById('loginContainer');
-    const dashboardContainer = document.getElementById('dashboardContainer');
+    const loginContainer = document.querySelector('.admin-login');
     const adminDashboard = document.getElementById('adminDashboard');
     
     if (loginContainer) loginContainer.style.display = 'none';
-    if (dashboardContainer) dashboardContainer.style.display = 'block';
     if (adminDashboard) adminDashboard.classList.remove('hidden');
     
     loadDashboardData();
@@ -78,7 +79,7 @@ async function handleAdminLogin(event) {
     try {
         showMessage('Verifying credentials...');
         
-        const response = await fetch('/api/admin/stats', {
+        const response = await fetch(getApiUrl('/api/admin/stats'), {
             headers: {
                 'x-admin-key': key
             },
@@ -86,7 +87,7 @@ async function handleAdminLogin(event) {
         });
 
         if (!response.ok) {
-            showError('Invalid admin key');
+            showError('Invalid admin key. Check ADMIN_API_KEY in your .env and try again.');
             return;
         }
 
@@ -98,7 +99,7 @@ async function handleAdminLogin(event) {
             showDashboard();
         }, 1000);
     } catch (error) {
-        showError(`Error: ${error.message}`);
+        showError(`Cannot reach admin API. Start the backend and open http://localhost:3000/admin. Details: ${error.message}`);
     }
 }
 
@@ -128,7 +129,7 @@ async function fetchAdminData(endpoint) {
     }
 
     try {
-        const response = await fetch(endpoint, {
+        const response = await fetch(getApiUrl(endpoint), {
             headers: {
                 'x-admin-key': key
             },
@@ -145,7 +146,7 @@ async function fetchAdminData(endpoint) {
 
         return await response.json();
     } catch (error) {
-        showError(`Failed to load data: ${error.message}`);
+        showError(`Failed to load data. If you opened the page directly, run the Node server and use /admin. Details: ${error.message}`);
         return null;
     }
 }
@@ -545,27 +546,10 @@ function initAdminPanel() {
     const refreshBtn = document.getElementById('refreshBtn') || document.getElementById('loadDataBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', (event) => {
-            const keyInput = document.getElementById('adminKeyInput') || document.getElementById('adminKey');
-            if (!keyInput) {
-                showError('Admin key input not found.');
-                return;
-            }
-
-            const key = keyInput.value.trim();
-            if (!key) {
-                showError('Please enter your admin key.');
-                return;
-            }
-
-            setAdminKey(key);
-            keyInput.value = '';
-            showDashboard();
-            return;
-
             if (event && typeof event.preventDefault === 'function') {
                 event.preventDefault();
             }
-            loadDashboardData();
+            handleAdminLogin(event);
         });
     }
 

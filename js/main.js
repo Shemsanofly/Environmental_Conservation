@@ -66,11 +66,15 @@ function initSmoothScrolling() {
  */
 function updateActiveNavLink() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    const normalizedCurrentPage = currentPage.replace(/\.html$/i, '') || 'index';
     const navLinks = document.querySelectorAll('.nav-link');
 
     navLinks.forEach(link => {
-        const href = link.getAttribute('href');
-        if (href === currentPage || (currentPage === '' && href === 'index.html')) {
+        const href = link.getAttribute('href') || '';
+        const pageHref = href.split('#')[0];
+        const normalizedHref = pageHref.replace(/\.html$/i, '') || 'index';
+
+        if (normalizedHref === normalizedCurrentPage) {
             link.classList.add('active');
         } else {
             link.classList.remove('active');
